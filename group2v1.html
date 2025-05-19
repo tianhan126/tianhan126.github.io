@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亲子游戏管理App原型</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            border: 12px solid #333;
+            border-radius: 36px;
+            margin: 20px;
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .prototype-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .game-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .game-icon {
+            width: 60px;
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .badge {
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        .nav-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-around;
+        }
+        .nav-item {
+            text-align: center;
+            color: #666;
+        }
+        .nav-item.active {
+            color: #007bff;
+        }
+        .stats-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .medal {
+            width: 80px;
+            height: 80px;
+            background: gold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="text-center my-4">亲子游戏管理App原型</h1>
+        <div class="prototype-grid">
+            <!-- 游戏选择界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>游戏选择</h5>
+                    <div class="mb-3">
+                        <select class="form-select">
+                            <option>选择游戏类型</option>
+                            <option>益智类</option>
+                            <option>动作类</option>
+                            <option>策略类</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select">
+                            <option>选择年龄段</option>
+                            <option>3-6岁</option>
+                            <option>7-12岁</option>
+                            <option>13-18岁</option>
+                        </select>
+                    </div>
+                    <div class="game-card">
+                        <div class="game-icon">
+                            <i class="fas fa-gamepad fa-2x"></i>
+                        </div>
+                        <h6>益智拼图</h6>
+                        <div class="d-flex justify-content-between">
+                            <span class="badge">人气: 98%</span>
+                            <span class="badge">7-12岁</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 游戏详情界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>游戏详情</h5>
+                    <img src="https://via.placeholder.com/300x200" class="img-fluid rounded mb-3">
+                    <h6>益智拼图</h6>
+                    <div class="mb-3">
+                        <h6>游戏特色：</h6>
+                        <ul>
+                            <li>提升空间思维能力</li>
+                            <li>培养耐心和专注力</li>
+                            <li>增强亲子互动</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <h6>潜在风险：</h6>
+                        <ul>
+                            <li>长时间使用可能影响视力</li>
+                            <li>建议每次游戏时间不超过30分钟</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 游戏计划制定界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>制定游戏计划</h5>
+                    <div class="mb-3">
+                        <label>每周游戏总时长</label>
+                        <input type="text" class="form-control" placeholder="例如：2小时">
+                    </div>
+                    <div class="mb-3">
+                        <label>游戏时间安排</label>
+                        <input type="text" class="form-control" placeholder="例如：周六下午2-4点">
+                    </div>
+                    <div class="mb-3">
+                        <label>游戏条件</label>
+                        <input type="text" class="form-control" placeholder="例如：完成作业后">
+                    </div>
+                    <div class="mb-3">
+                        <label>设置暗号</label>
+                        <input type="password" class="form-control" placeholder="请输入暗号">
+                    </div>
+                    <div class="mb-3">
+                        <label>确认暗号</label>
+                        <input type="password" class="form-control" placeholder="请再次输入暗号">
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary">确认计划</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 游戏契约界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>游戏契约</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>契约内容：</h6>
+                            <p>1. 每周游戏时间：2小时</p>
+                            <p>2. 游戏时间：周六下午2-4点</p>
+                            <p>3. 游戏条件：完成作业后</p>
+                            <div class="d-flex justify-content-between mt-3">
+                                <button class="btn btn-primary">确认契约</button>
+                                <button class="btn btn-outline-secondary">修改</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 游戏打卡界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>游戏打卡</h5>
+                    <div class="text-center mb-4">
+                        <i class="fas fa-clock fa-3x text-primary"></i>
+                        <h3 class="mt-3">00:00:00</h3>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button class="btn btn-success">开始游戏</button>
+                        <button class="btn btn-danger">结束游戏</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 统计分析界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>游戏统计</h5>
+                    <div class="stats-card">
+                        <h6>本周游戏情况</h6>
+                        <p>总时长：1.5小时</p>
+                        <p>遵守情况：良好</p>
+                    </div>
+                    <div class="stats-card">
+                        <h6>建议</h6>
+                        <p>建议适当增加户外活动时间，保持游戏时间在合理范围内。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 勋章墙界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>我的勋章</h5>
+                    <div class="medal">
+                        <i class="fas fa-trophy fa-2x"></i>
+                    </div>
+                    <h6 class="text-center">遵守契约勋章</h6>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary">
+                            <i class="fab fa-weixin"></i> 分享给家长
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 亲子沟通界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>亲子沟通</h5>
+                    <div class="d-flex justify-content-around mb-4">
+                        <button class="btn btn-primary">孩子入口</button>
+                        <button class="btn btn-primary">家长入口</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>引导问题：</h6>
+                            <p>想一想，爸爸妈妈担心你玩游戏，可能是担心什么呢？</p>
+                            <textarea class="form-control" rows="3" placeholder="在这里输入你的想法..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 家长沟通界面 -->
+            <div class="phone-container">
+                <div class="phone-screen">
+                    <h5>家长沟通</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>引导问题：</h6>
+                            <p>孩子喜欢玩这个游戏，可能是因为它带来了什么乐趣或满足感？</p>
+                            <textarea class="form-control" rows="3" placeholder="在这里输入你的想法..."></textarea>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-phone"></i> 开始通话
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
