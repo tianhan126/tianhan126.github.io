@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>淘宝AI助手原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF4400',
+                        secondary: '#FFB800',
+                        neutral: {
+                            100: '#F5F5F5',
+                            200: '#E5E5E5',
+                            300: '#D4D4D4',
+                            400: '#A3A3A3',
+                            500: '#737373',
+                            600: '#525252',
+                            700: '#404040',
+                            800: '#262626',
+                            900: '#171717',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'phone': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .phone-frame {
+                @apply relative rounded-[2.5rem] bg-neutral-800 shadow-phone overflow-hidden;
+            }
+            .phone-notch {
+                @apply absolute top-0 left-1/2 transform -translate-x-1/2 w-[10rem] h-[2rem] bg-neutral-900 rounded-b-[1.5rem];
+            }
+            .phone-screen {
+                @apply relative bg-white overflow-hidden;
+            }
+            .phone-button {
+                @apply absolute bottom-4 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full border-2 border-neutral-700;
+            }
+            .tab-active {
+                @apply text-primary border-b-2 border-primary;
+            }
+            .gradient-overlay {
+                @apply absolute inset-0 bg-gradient-to-t from-black/70 to-transparent;
+            }
+            .product-card {
+                @apply bg-white rounded-xl shadow-card overflow-hidden transition-all duration-300 hover:shadow-lg;
+            }
+            .answer-card {
+                @apply bg-white rounded-lg p-4 shadow-sm border border-neutral-200 mb-3 transition-all duration-300 hover:shadow-md;
+            }
+            .analysis-bar {
+                @apply h-2 rounded-full overflow-hidden bg-neutral-200;
+            }
+            .analysis-fill {
+                @apply h-full rounded-full transition-all duration-1000 ease-out;
+            }
+            .trust-badge {
+                @apply absolute top-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded-full shadow-md;
+            }
+            .skeleton {
+                @apply animate-pulse bg-neutral-200 rounded;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-neutral-100 to-neutral-200 min-h-screen p-4 md:p-8 font-sans">
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-neutral-800 mb-2">淘宝AI助手 - 商品真实性验证原型</h1>
+            <p class="text-neutral-600 max-w-2xl mx-auto">利用AI技术帮助消费者验证商品宣传与实际评价的匹配度，提升网购体验</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 商品详情页 -->
+            <div class="phone-frame w-[22rem] h-[46rem] mx-auto">
+                <div class="phone-notch"></div>
+                <div class="phone-screen h-full">
+                    <!-- 顶部导航 -->
+                    <div class="bg-white shadow-sm sticky top-0 z-10">
+                        <div class="flex items-center justify-between p-4">
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-arrow-left text-lg"></i>
+                            </button>
+                            <h2 class="font-bold text-neutral-800">商品详情</h2>
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-share-alt text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 商品图片 -->
+                    <div class="relative h-64 bg-neutral-100">
+                        <img src="https://picsum.photos/seed/taobao1/800/600" alt="商品图片" class="w-full h-full object-cover">
+                        <div class="absolute bottom-3 right-3 bg-white/90 rounded-full p-2 shadow-md">
+                            <i class="fa-solid fa-star text-secondary"></i>
+                            <span class="ml-1 font-medium">4.8</span>
+                        </div>
+                    </div>
+
+                    <!-- 商品信息 -->
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-neutral-800 mb-2">高级纯棉宽松休闲T恤</h3>
+                        <div class="flex items-center mb-2">
+                            <span class="text-primary font-bold text-xl">¥129</span>
+                            <span class="text-neutral-400 line-through ml-2">¥299</span>
+                            <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded ml-2">限时优惠</span>
+                        </div>
+                        <div class="flex items-center text-sm text-neutral-500 mb-4">
+                            <span>月销 1.2万+</span>
+                            <span class="mx-2">|</span>
+                            <span>3.5万+评价</span>
+                        </div>
+                        <div class="bg-neutral-50 p-3 rounded-lg mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-neutral-600">材质</span>
+                                <span class="font-medium">100%纯棉</span>
+                            </div>
+                            <div class="flex justify-between text-sm mt-2">
+                                <span class="text-neutral-600">颜色</span>
+                                <span class="font-medium">白色/黑色/蓝色/灰色</span>
+                            </div>
+                            <div class="flex justify-between text-sm mt-2">
+                                <span class="text-neutral-600">尺码</span>
+                                <span class="font-medium">S/M/L/XL/XXL</span>
+                            </div>
+                        </div>
+
+                        <!-- 底部选项卡 -->
+                        <div class="border-t border-neutral-200 pt-3 mt-auto">
+                            <div class="flex justify-around">
+                                <button class="flex flex-col items-center py-2 px-4">
+                                    <i class="fa-regular fa-comment text-lg mb-1"></i>
+                                    <span class="text-sm">问问题</span>
+                                </button>
+                                <button class="flex flex-col items-center py-2 px-4 tab-active">
+                                    <i class="fa-solid fa-check-circle text-lg mb-1"></i>
+                                    <span class="text-sm">宣传可信度</span>
+                                </button>
+                                <button class="flex flex-col items-center py-2 px-4">
+                                    <i class="fa-regular fa-comments text-lg mb-1"></i>
+                                    <span class="text-sm">用户评价</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-button"></div>
+            </div>
+
+            <!-- 问问题界面 -->
+            <div class="phone-frame w-[22rem] h-[46rem] mx-auto">
+                <div class="phone-notch"></div>
+                <div class="phone-screen h-full">
+                    <!-- 顶部导航 -->
+                    <div class="bg-white shadow-sm sticky top-0 z-10">
+                        <div class="flex items-center justify-between p-4">
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-arrow-left text-lg"></i>
+                            </button>
+                            <h2 class="font-bold text-neutral-800">商品问答</h2>
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-ellipsis-v text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 问题输入区 -->
+                    <div class="p-4 border-b border-neutral-200">
+                        <div class="relative">
+                            <input type="text" placeholder="请输入您的问题..." class="w-full py-3 px-4 pr-10 rounded-full border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all">
+                            <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-between mt-3 text-xs text-neutral-500">
+                            <span>热门问题: 会缩水吗 · 尺码标准吗 · 颜色有色差吗</span>
+                            <button class="text-primary">查看全部</button>
+                        </div>
+                    </div>
+
+                    <!-- 问题和回答 -->
+                    <div class="p-4 overflow-y-auto max-h-[calc(100%-14rem)]">
+                        <div class="mb-6">
+                            <div class="flex items-start mb-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+                                    <i class="fa-regular fa-user"></i>
+                                </div>
+                                <div class="bg-neutral-100 rounded-lg rounded-tl-none p-3 max-w-[80%]">
+                                    <p class="text-neutral-800">这件衣服会缩水吗？</p>
+                                </div>
+                            </div>
+
+                            <!-- AI回答1：卖家宣传分析 -->
+                            <div class="answer-card">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-2">
+                                        <i class="fa-solid fa-bullhorn text-xs"></i>
+                                    </div>
+                                    <h4 class="font-medium text-neutral-800">卖家宣传分析</h4>
+                                </div>
+                                <p class="text-neutral-700 text-sm">根据商品宣传页的描述，这件T恤采用高品质纯棉面料，经过特殊处理，不易缩水。宣传页中提到"经过预缩水处理，洗涤后尺寸稳定性好"。</p>
+                            </div>
+
+                            <!-- AI回答2：买家评价分析 -->
+                            <div class="answer-card">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-2">
+                                        <i class="fa-solid fa-comments text-xs"></i>
+                                    </div>
+                                    <h4 class="font-medium text-neutral-800">买家评价分析</h4>
+                                </div>
+                                <p class="text-neutral-700 text-sm">分析了2000+条买家评论，其中82%的用户表示衣服洗涤后没有明显缩水，15%的用户反映有轻微缩水（约1-2cm），3%的用户表示缩水明显。多数用户认为尺码标准，但部分用户建议选择比平时大一号的尺码。</p>
+                            </div>
+
+                            <!-- 差异分析 -->
+                            <div class="answer-card bg-primary/5 border-primary/20">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-2">
+                                        <i class="fa-solid fa-balance-scale text-xs"></i>
+                                    </div>
+                                    <h4 class="font-medium text-primary">差异分析</h4>
+                                </div>
+                                <p class="text-neutral-700 text-sm">卖家宣传与买家评价的差异度为<span class="font-bold text-primary">15%</span>，主要差异点在于少数用户反映的轻微缩水情况。总体来说，卖家宣传与实际情况基本相符。</p>
+                                <div class="mt-3 analysis-bar">
+                                    <div class="analysis-fill bg-primary" style="width: 85%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-neutral-500 mt-1">
+                                    <span>相符度 85%</span>
+                                    <span>差异度 15%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 底部输入框 -->
+                    <div class="sticky bottom-0 bg-white p-3 border-t border-neutral-200">
+                        <div class="flex items-center">
+                            <button class="text-neutral-500 mr-2">
+                                <i class="fa-solid fa-plus-circle text-xl"></i>
+                            </button>
+                            <input type="text" placeholder="继续提问..." class="flex-1 py-2 px-3 rounded-full bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <button class="text-primary ml-2">
+                                <i class="fa-solid fa-paper-plane text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-button"></div>
+            </div>
+
+            <!-- 宣传可信度报告 -->
+            <div class="phone-frame w-[22rem] h-[46rem] mx-auto">
+                <div class="phone-notch"></div>
+                <div class="phone-screen h-full">
+                    <!-- 顶部导航 -->
+                    <div class="bg-white shadow-sm sticky top-0 z-10">
+                        <div class="flex items-center justify-between p-4">
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-arrow-left text-lg"></i>
+                            </button>
+                            <h2 class="font-bold text-neutral-800">宣传可信度报告</h2>
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-share-alt text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 可信度总分 -->
+                    <div class="bg-gradient-to-r from-primary to-orange-500 p-6 text-white text-center">
+                        <h3 class="text-xl font-bold mb-1">宣传可信度</h3>
+                        <div class="flex justify-center items-center my-3">
+                            <span class="text-4xl font-bold">87</span>
+                            <span class="text-xl ml-1">分</span>
+                        </div>
+                        <p class="text-white/80 text-sm">可信度较高，宣传与实际情况基本相符</p>
+                    </div>
+
+                    <!-- 报告详情 -->
+                    <div class="p-4 overflow-y-auto max-h-[calc(100%-18rem)]">
+                        <!-- 分析项 -->
+                        <div class="mb-5">
+                            <h4 class="font-medium text-neutral-800 mb-3">宣传与实际对比</h4>
+                            
+                            <!-- 材质分析 -->
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-neutral-700">材质描述</span>
+                                    <span class="text-green-600 font-medium">高度相符</span>
+                                </div>
+                                <div class="analysis-bar">
+                                    <div class="analysis-fill bg-green-500" style="width: 95%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-neutral-500 mt-1">
+                                    <span>卖家: 100%纯棉</span>
+                                    <span>95%用户确认</span>
+                                </div>
+                                <p class="text-xs text-neutral-500 mt-2">分析了3,500+条评论，95%的用户确认衣服材质为纯棉，手感柔软舒适，无异味。</p>
+                            </div>
+
+                            <!-- 颜色分析 -->
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-neutral-700">颜色准确性</span>
+                                    <span class="text-yellow-600 font-medium">基本相符</span>
+                                </div>
+                                <div class="analysis-bar">
+                                    <div class="analysis-fill bg-yellow-500" style="width: 80%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-neutral-500 mt-1">
+                                    <span>卖家: 与图片一致</span>
+                                    <span>80%用户确认</span>
+                                </div>
+                                <p class="text-xs text-neutral-500 mt-2">约20%的用户反馈实际颜色与商品图片存在轻微色差，主要集中在蓝色和灰色款。</p>
+                            </div>
+
+                            <!-- 尺寸分析 -->
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-neutral-700">尺码准确性</span>
+                                    <span class="text-yellow-600 font-medium">基本相符</span>
+                                </div>
+                                <div class="analysis-bar">
+                                    <div class="analysis-fill bg-yellow-500" style="width: 78%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-neutral-500 mt-1">
+                                    <span>卖家: 标准尺码</span>
+                                    <span>78%用户确认</span>
+                                </div>
+                                <p class="text-xs text-neutral-500 mt-2">22%的用户反映衣服尺码偏小，建议购买时选择比平时大一号的尺码。</p>
+                            </div>
+
+                            <!-- 缩水分析 -->
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-neutral-700">缩水情况</span>
+                                    <span class="text-orange-500 font-medium">存在差异</span>
+                                </div>
+                                <div class="analysis-bar">
+                                    <div class="analysis-fill bg-orange-500" style="width: 65%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-neutral-500 mt-1">
+                                    <span>卖家: 不易缩水</span>
+                                    <span>65%用户确认</span>
+                                </div>
+                                <p class="text-xs text-neutral-500 mt-2">35%的用户反馈洗涤后有轻微缩水，尤其是第一次洗涤时。建议冷水洗涤并平铺晾干。</p>
+                            </div>
+                        </div>
+
+                        <!-- 总结建议 -->
+                        <div class="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                            <h4 class="font-medium text-neutral-800 mb-2 flex items-center">
+                                <i class="fa-solid fa-lightbulb text-yellow-500 mr-2"></i>
+                                购买建议
+                            </h4>
+                            <ul class="text-sm text-neutral-700 space-y-1">
+                                <li class="flex items-start">
+                                    <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>总体来说该商品宣传可信度较高，值得购买</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa-solid fa-exclamation-circle text-yellow-500 mt-1 mr-2"></i>
+                                    <span>对颜色敏感的用户建议购买前咨询客服</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa-solid fa-exclamation-circle text-yellow-500 mt-1 mr-2"></i>
+                                    <span>建议选择比平时大一号的尺码</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa-solid fa-exclamation-circle text-yellow-500 mt-1 mr-2"></i>
+                                    <span>首次洗涤建议冷水手洗并平铺晾干，减少缩水风险</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 底部按钮 -->
+                    <div class="sticky bottom-0 bg-white p-4 border-t border-neutral-200">
+                        <button class="w-full bg-primary text-white py-3 rounded-full font-medium transition-all hover:bg-primary/90 active:scale-98">
+                            查看全部分析详情
+                        </button>
+                    </div>
+                </div>
+                <div class="phone-button"></div>
+            </div>
+
+            <!-- 商品搜索页 -->
+            <div class="phone-frame w-[22rem] h-[46rem] mx-auto">
+                <div class="phone-notch"></div>
+                <div class="phone-screen h-full">
+                    <!-- 顶部导航 -->
+                    <div class="bg-white shadow-sm sticky top-0 z-10">
+                        <div class="flex items-center justify-between p-4">
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-arrow-left text-lg"></i>
+                            </button>
+                            <div class="relative flex-1 max-w-[80%] mx-3">
+                                <input type="text" placeholder="搜索商品" class="w-full py-2 px-4 pl-10 rounded-full bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
+                            </div>
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-filter text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 搜索结果 -->
+                    <div class="p-4 overflow-y-auto max-h-[calc(100%-12rem)]">
+                        <!-- 排序选项 -->
+                        <div class="flex justify-between mb-4 border-b border-neutral-200 pb-3">
+                            <button class="text-primary font-medium">综合</button>
+                            <button class="text-neutral-600">销量</button>
+                            <button class="text-neutral-600">价格</button>
+                            <button class="text-neutral-600 tab-active">可信度</button>
+                            <button class="text-neutral-600">最新</button>
+                        </div>
+
+                        <!-- 商品列表 -->
+                        <div class="space-y-3">
+                            <!-- 商品1 -->
+                            <div class="product-card">
+                                <div class="relative">
+                                    <img src="https://picsum.photos/seed/taobao2/400/300" alt="商品图片" class="w-full h-40 object-cover">
+                                    <div class="trust-badge">92%</div>
+                                </div>
+                                <div class="p-3">
+                                    <h4 class="font-medium text-neutral-800 line-clamp-2 h-10">高级纯棉宽松休闲T恤 男士夏季短袖上衣</h4>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="text-primary font-bold">¥129</span>
+                                        <div class="flex items-center text-xs text-neutral-500">
+                                            <i class="fa-solid fa-star text-yellow-500 mr-1"></i>
+                                            <span>4.9</span>
+                                            <span class="mx-1">|</span>
+                                            <span>2.5万+</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 flex items-center">
+                                        <div class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">高可信度</div>
+                                        <span class="text-xs text-neutral-500 ml-2">材质与描述一致</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 商品2 -->
+                            <div class="product-card">
+                                <div class="relative">
+                                    <img src="https://picsum.photos/seed/taobao3/400/300" alt="商品图片" class="w-full h-40 object-cover">
+                                    <div class="trust-badge">87%</div>
+                                </div>
+                                <div class="p-3">
+                                    <h4 class="font-medium text-neutral-800 line-clamp-2 h-10">女士纯棉连衣裙 夏季新款碎花中长款收腰显瘦</h4>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="text-primary font-bold">¥199</span>
+                                        <div class="flex items-center text-xs text-neutral-500">
+                                            <i class="fa-solid fa-star text-yellow-500 mr-1"></i>
+                                            <span>4.8</span>
+                                            <span class="mx-1">|</span>
+                                            <span>1.8万+</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 flex items-center">
+                                        <div class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">较高可信度</div>
+                                        <span class="text-xs text-neutral-500 ml-2">颜色与图片基本一致</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 商品3 -->
+                            <div class="product-card">
+                                <div class="relative">
+                                    <img src="https://picsum.photos/seed/taobao4/400/300" alt="商品图片" class="w-full h-40 object-cover">
+                                    <div class="trust-badge">83%</div>
+                                </div>
+                                <div class="p-3">
+                                    <h4 class="font-medium text-neutral-800 line-clamp-2 h-10">纯棉休闲裤 男士直筒宽松百搭长裤</h4>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="text-primary font-bold">¥159</span>
+                                        <div class="flex items-center text-xs text-neutral-500">
+                                            <i class="fa-solid fa-star text-yellow-500 mr-1"></i>
+                                            <span>4.7</span>
+                                            <span class="mx-1">|</span>
+                                            <span>1.2万+</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 flex items-center">
+                                        <div class="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">中等可信度</div>
+                                        <span class="text-xs text-neutral-500 ml-2">部分用户反馈略修身</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 商品4 -->
+                            <div class="product-card">
+                                <div class="relative">
+                                    <img src="https://picsum.photos/seed/taobao5/400/300" alt="商品图片" class="w-full h-40 object-cover">
+                                    <div class="trust-badge">79%</div>
+                                </div>
+                                <div class="p-3">
+                                    <h4 class="font-medium text-neutral-800 line-clamp-2 h-10">夏季纯棉短袖T恤 女士宽松韩版上衣</h4>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="text-primary font-bold">¥89</span>
+                                        <div class="flex items-center text-xs text-neutral-500">
+                                            <i class="fa-solid fa-star text-yellow-500 mr-1"></i>
+                                            <span>4.6</span>
+                                            <span class="mx-1">|</span>
+                                            <span>3.2万+</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 flex items-center">
+                                        <div class="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">中等可信度</div>
+                                        <span class="text-xs text-neutral-500 ml-2">少量用户反馈有轻微缩水</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 底部导航 -->
+                    <div class="sticky bottom-0 bg-white border-t border-neutral-200">
+                        <div class="flex justify-around py-2">
+                            <button class="flex flex-col items-center text-primary">
+                                <i class="fa-solid fa-home text-lg mb-1"></i>
+                                <span class="text-xs">首页</span>
+                            </button>
+                            <button class="flex flex-col items-center text-neutral-500">
+                                <i class="fa-solid fa-search text-lg mb-1"></i>
+                                <span class="text-xs">搜索</span>
+                            </button>
+                            <button class="flex flex-col items-center text-neutral-500">
+                                <i class="fa-solid fa-shopping-cart text-lg mb-1"></i>
+                                <span class="text-xs">购物车</span>
+                            </button>
+                            <button class="flex flex-col items-center text-neutral-500">
+                                <i class="fa-solid fa-user text-lg mb-1"></i>
+                                <span class="text-xs">我的</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-button"></div>
+            </div>
+
+            <!-- 智能评价生成 -->
+            <div class="phone-frame w-[22rem] h-[46rem] mx-auto">
+                <div class="phone-notch"></div>
+                <div class="phone-screen h-full">
+                    <!-- 顶部导航 -->
+                    <div class="bg-white shadow-sm sticky top-0 z-10">
+                        <div class="flex items-center justify-between p-4">
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-arrow-left text-lg"></i>
+                            </button>
+                            <h2 class="font-bold text-neutral-800">评价生成助手</h2>
+                            <button class="text-neutral-700">
+                                <i class="fa-solid fa-check text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 商品信息 -->
+                    <div class="bg-neutral-50 p-3 flex items-center">
+                        <img src="https://picsum.photos/seed/taobao6/100/100" alt="商品图片" class="w-16 h-16 object-cover rounded">
+                        <div class="ml-3 flex-1">
+                            <h3 class="font-medium text-neutral-800 text-sm line-clamp-2">高级纯棉宽松休闲T恤 男士夏季短袖上衣</h3>
+                            <div class="flex items-center text-xs text-neutral-500 mt-1">
+                                <span>颜色: 白色</span>
+                                <span class="mx-2">|</span>
+                                <span>尺码: L</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评分区域 -->
+                    <div class="p-4 border-b border-neutral-200">
+                        <h4 class="text-neutral-700 mb-3">给商品评分</h4>
+                        <div class="flex justify-center">
+                            <div class="flex space-x-4">
+                                <button class="flex flex-col items-center text-yellow-500">
+                                    <i class="fa-solid fa-star text-2xl"></i>
+                                    <span class="text-xs mt-1">非常好</span>
+                                </button>
+                                <button class="flex flex-col items-center text-yellow-500">
+                                    <i class="fa-solid fa-star text-2xl"></i>
+                                    <span class="text-xs mt-1">好</span>
+                                </button>
+                                <button class="flex flex-col items-center text-yellow-500">
+                                    <i class="fa-solid fa-star text-2xl"></i>
+                                    <span class="text-xs mt-1">一般</span>
+                                </button>
+                                <button class="flex flex-col items-center text-neutral-300">
+                                    <i class="fa-regular fa-star text-2xl"></i>
+                                    <span class="text-xs mt-1">差</span>
+                                </button>
+                                <button class="flex flex-col items-center text-neutral-300">
+                                    <i class="fa-regular fa-star text-2xl"></i>
+                                    <span class="text-xs mt-1">很差</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评价内容 -->
+                    <div class="p-4 overflow-y-auto max-h-[calc(100%-22rem)]">
+                        <h4 class="text-neutral-700 mb-3">AI生成评价</h4>
+                        <div class="bg-neutral-50 rounded-lg p-3 mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-neutral-800">根据您的偏好生成</span>
+                                <button class="text-primary text-xs">重新生成</button>
+                            </div>
+                            <textarea id="reviewContent" class="w-full h-36 bg-transparent text-neutral-700 text-sm focus:outline-none resize-none" readonly>这件T恤的质量超出我的预期！纯棉面料手感柔软，穿着舒适透气，完全没有刺激皮肤的感觉。款式设计简约大方，宽松的版型很百搭，我搭配牛仔裤和休闲裤都很好看。衣服的颜色也很正，和商品图片上展示的一模一样，没有色差。尺码标准，我按照平时穿的尺码购买，大小正合适。唯一有点遗憾的是，第一次洗涤后有点轻微缩水，不过晾干后就恢复了一些。总体来说，这是一次非常满意的购物体验，性价比很高，推荐购买！</textarea>
+                        </div>
+
+                        <!-- 评价维度 -->
+                        <div class="mb-4">
+                            <h4 class="text-neutral-700 mb-2">评价维度</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center bg-neutral-50 p-2 rounded">
+                                    <input type="checkbox" checked class="mr-2">
+                                    <span class="text-sm text-neutral-700">材质质量</span>
+                                </label>
+                                <label class="flex items-center bg-neutral-50 p-2 rounded">
+                                    <input type="checkbox" checked class="mr-2">
+                                    <span class="text-sm text-neutral-700">颜色差异</span>
+                                </label>
+                                <label class="flex items-center bg-neutral-50 p-2 rounded">
+                                    <input type="checkbox" checked class="mr-2">
+                                    <span class="text-sm text-neutral-700">尺码合适度</span>
+                                </label>
+                                <label class="flex items-center bg-neutral-50 p-2 rounded">
+                                    <input type="checkbox" checked class="mr-2">
+                                    <span class="text-sm text-neutral-700">款式设计</span>
+                                </label>
+                                <label class="flex items-center bg-neutral-50 p-2 rounded">
+                                    <input type="checkbox" checked class="mr-2">
+                                    <span class="text-sm text-neutral-700">洗涤保养</span>
+                                </label>
+                                <label class="flex items-center bg-neutral-50 p-2 rounded">
+                                    <input type="checkbox" class="mr-2">
+                                    <span class="text-sm text-neutral-700">性价比</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 我的偏好 -->
+                        <div>
+                            <h4 class="text-neutral-700 mb-2">我的偏好</h4>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <div class="flex items-center mb-2">
+                                    <i class="fa-solid fa-tshirt text-neutral-500 mr-2"></i>
+                                    <span class="text-sm text-neutral-700">我喜欢宽松的版型</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-paint-brush text-neutral-500 mr-2"></i>
+                                    <span class="text-sm text-neutral-700">我对颜色要求较高</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 底部按钮 -->
+                    <div class="sticky bottom-0 bg-white p-4 border-t border-neutral-200">
+                        <button class="w-full bg-primary text-white py-3 rounded-full font-medium transition-all hover:bg-primary/90 active:scale-98">
+                            使用此评价
+                        </button>
+                        <button class="w-full mt-2 bg-white text-primary border border-primary py-3 rounded-full font-medium transition-all hover:bg-primary/5 active:scale-98">
+                            手动编辑
+                        </button>
+                    </div>
+                </div>
+                <div class="phone-button"></div>
+            </div>
+
+            <!-- 功能介绍卡片 -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8 col-span-1 md:col-span-2 lg:col-span-3">
+                <h2 class="text-2xl font-bold text-neutral-800 mb-4">淘宝AI助手功能介绍</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- 功能1 -->
+                    <div class="bg-neutral-50 rounded-xl p-5 transition-all duration-300 hover:shadow-md hover:transform hover:translate-y-[-5px]">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
+                            <i class="fa-regular fa-comment text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-neutral-800 mb-2">智能问答</h3>
+                        <p class="text-neutral-600">通过AI分析卖家宣传和买家评价，回答您关于商品的问题，并提供分析差异度，帮助您做出更明智的购买决策。</p>
+                    </div>
+                    
+                    <!-- 功能2 -->
+                    <div class="bg-neutral-50 rounded-xl p-5 transition-all duration-300 hover:shadow-md hover:transform hover:translate-y-[-5px]">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
+                            <i class="fa-solid fa-check-circle text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-neutral-800 mb-2">宣传可信度</h3>
+                        <p class="text-neutral-600">AI对比分析卖家宣传与买家实际评价，生成可信度报告和评分，让您清晰了解商品宣传的真实性。</p>
+                    </div>
+                    
+                    <!-- 功能3 -->
+                    <div class="bg-neutral-50 rounded-xl p-5 transition-all duration-300 hover:shadow-md hover:transform hover:translate-y-[-5px]">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
+                            <i class="fa-regular fa-comments text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-neutral-800 mb-2">智能评价生成</h3>
+                        <p class="text-neutral-600">基于您的购买记录和个人偏好，AI自动生成多维度评价内容，支持自由编辑，帮助您快速撰写真实评价。</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <p class="text-neutral-600 mb-4">这些功能将帮助消费者更准确地了解商品真实情况，减少因信息不对称导致的购物纠纷，提升网购体验。</p>
+                    <button class="bg-primary text-white px-6 py-3 rounded-full font-medium transition-all hover:bg-primary/90 active:scale-98 shadow-md">
+                        了解更多
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-12 text-center text-neutral-500 text-sm">
+            <p>© 2025 淘宝AI助手 - 商品真实性验证系统</p>
+        </footer>
+    </div>
+</body>
+</html>
+    
