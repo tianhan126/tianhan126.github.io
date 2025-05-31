@@ -1,0 +1,3175 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>胡萝卜塔防 - 增强版</title>
+    <style>
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            min-height: 100vh;
+            color: #2e7d32;
+        }
+        
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 100, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #game-title {
+            color: #ff8f00;
+            font-size: 2.8em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff8f00, #ffca28);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 2;
+        }
+        
+        #game-title::after {
+            content: '增强版';
+            position: absolute;
+            top: -10px;
+            right: -40px;
+            font-size: 0.4em;
+            background: #e91e63;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            transform: rotate(15deg);
+        }
+        
+        #game-board {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background-color: #a5d6a7;
+            border: 8px solid #81c784;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        #carrot {
+            position: absolute;
+            right: 20px;
+            bottom: 50px;
+            font-size: 50px;
+            z-index: 10;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .path {
+            position: absolute;
+            background-color: #8d6e63; /* 土地色 */
+            border-radius: 10px;
+        }
+        
+        /* 新的蜿蜒路径 */
+        #path1 {
+            width: 100px;
+            height: 30px;
+            left: 50px;
+            top: 100px;
+        }
+        
+        #path2 {
+            width: 30px;
+            height: 50px;
+            left: 150px;
+            top: 100px;
+        }
+        
+        #path3 {
+            width: 100px;
+            height: 30px;
+            left: 150px;
+            top: 150px;
+        }
+        
+        #path4 {
+            width: 30px;
+            height: 50px;
+            left: 250px;
+            top: 150px;
+        }
+        
+        #path5 {
+            width: 100px;
+            height: 30px;
+            left: 250px;
+            top: 200px;
+        }
+        
+        #path6 {
+            width: 30px;
+            height: 50px;
+            left: 350px;
+            top: 200px;
+        }
+        
+        #path7 {
+            width: 100px;
+            height: 30px;
+            left: 350px;
+            top: 250px;
+        }
+        
+        #path8 {
+            width: 30px;
+            height: 50px;
+            left: 450px;
+            top: 250px;
+        }
+        
+        #path9 {
+            width: 100px;
+            height: 30px;
+            left: 450px;
+            top: 300px;
+        }
+        
+        .tower {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.2s;
+            background: radial-gradient(circle at 30% 30%, #fff, #f1f8e9);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .tower:hover {
+            transform: scale(1.1) rotate(5deg);
+            z-index: 15;
+        }
+        
+        .tower-level {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background-color: #ff8f00;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .pea-shooter {
+            background-color: #4caf50;
+            color: #2e7d32;
+        }
+        
+        .pepper-thrower {
+            background-color: #f44336;
+            color: #b71c1c;
+        }
+        
+        .onion-guard {
+            background-color: #ffeb3b;
+            color: #f57f17;
+        }
+        
+        .corn-cannon {
+            background-color: #fff59d;
+            color: #f9a825;
+        }
+        
+        .potato-mine {
+            background-color: #8d6e63;
+            color: #4e342e;
+        }
+        
+        .garlic-tower {
+            background-color: #f8bbd0;
+            color: #ad1457;
+        }
+        
+        .cabbage-pult {
+            background-color: #dce775;
+            color: #827717;
+        }
+        
+        .melon-pult {
+            background-color: #a5d6a7;
+            color: #2e7d32;
+        }
+        
+        .sunflower {
+            background-color: #fff176;
+            color: #f57f17;
+        }
+        
+        /* 新炮台样式 */
+        .strawberry {
+            background-color: #f44336;
+            color: #c62828;
+        }
+        
+        .pineapple {
+            background-color: #ffeb3b;
+            color: #f9a825;
+        }
+        
+        .cactus {
+            background-color: #4caf50;
+            color: #2e7d32;
+        }
+        
+        .mushroom {
+            background-color: #7b1fa2;
+            color: #4a148c;
+        }
+        
+        .projectile {
+            position: absolute;
+            font-size: 20px;
+            z-index: 4;
+            transition: transform 0.1s linear;
+        }
+        
+        .enemy {
+            position: absolute;
+            font-size: 30px;
+            z-index: 3;
+            transition: left 0.1s linear, top 0.1s linear;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+        }
+        
+        /* 新敌人样式 */
+        .dragon {
+            font-size: 40px;
+            color: #d32f2f;
+            z-index: 4;
+            animation: flame 1s infinite alternate;
+        }
+        
+        @keyframes flame {
+            0% { text-shadow: 0 0 5px #ff5722; }
+            100% { text-shadow: 0 0 15px #ff5722, 0 0 25px #ff9800; }
+        }
+        
+        .wizard-rabbit {
+            font-size: 35px;
+            color: #7b1fa2;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .armored-beetle {
+            font-size: 32px;
+            color: #455a64;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .toxic-snail {
+            font-size: 34px;
+            color: #7cb342;
+            animation: toxic-pulse 2s infinite;
+        }
+        
+        @keyframes toxic-pulse {
+            0% { text-shadow: 0 0 5px #7cb342; }
+            50% { text-shadow: 0 0 15px #7cb342; }
+            100% { text-shadow: 0 0 5px #7cb342; }
+        }
+        
+        #tower-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            max-width: 600px;
+            padding: 15px;
+            background-color: #f1f8e9;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tower-option {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            cursor: pointer;
+            background-color: #c8e6c9;
+            border: 3px solid #81c784;
+            transition: transform 0.2s;
+            position: relative;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        
+        .tower-option:hover {
+            transform: scale(1.1);
+            background-color: #a5d6a7;
+        }
+        
+        .tower-cost {
+            position: absolute;
+            bottom: -15px;
+            font-size: 12px;
+            background-color: #ff8f00;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 10px;
+            min-width: 30px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .selected {
+            border-color: #ff8f00;
+            box-shadow: 0 0 10px #ff8f00;
+        }
+        
+        .locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            position: relative;
+        }
+        
+        .locked::after {
+            content: "🔒";
+            position: absolute;
+            bottom: -20px;
+            font-size: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #d32f2f;
+        }
+        
+        #game-info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #81c784, #66bb6a);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        #controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .game-button {
+            background: linear-gradient(to bottom, #ff8f00, #f57c00);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            min-width: 140px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .game-button:active {
+            transform: translateY(1px);
+        }
+        
+        .game-button:disabled {
+            background: linear-gradient(to bottom, #bdbdbd, #9e9e9e);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #restart-button {
+            background: linear-gradient(to bottom, #d32f2f, #b71c1c);
+        }
+        
+        #handbook-button {
+            background: linear-gradient(to bottom, #2196f3, #1976d2);
+        }
+        
+        #difficulty-button {
+            background: linear-gradient(to bottom, #9c27b0, #7b1fa2);
+        }
+        
+        #pause-button {
+            background: linear-gradient(to bottom, #607d8b, #455a64);
+        }
+        
+        #achievements-button {
+            background: linear-gradient(to bottom, #ff9800, #f57c00);
+        }
+        
+        #message {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #d32f2f;
+            min-height: 25px;
+            padding: 8px 15px;
+            background-color: #ffebee;
+            border-radius: 20px;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .health-bar {
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: #ccc;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4caf50, #8bc34a);
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        /* 图鉴样式 */
+        #handbook-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #handbook-content {
+            background-color: #f1f8e9;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .handbook-section {
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .handbook-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f1f8e9;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .locked-item {
+            opacity: 0.7;
+            background-color: #f5f5f5;
+        }
+        
+        .lock-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #d32f2f;
+            font-size: 20px;
+        }
+        
+        .handbook-icon {
+            font-size: 40px;
+            margin-right: 15px;
+            width: 60px;
+            text-align: center;
+        }
+        
+        .handbook-details {
+            flex: 1;
+        }
+        
+        .close-button {
+            background: linear-gradient(to bottom, #f44336, #d32f2f);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .close-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* 难度选择样式 */
+        #difficulty-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #difficulty-content {
+            background-color: #f1f8e9;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .difficulty-option {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .difficulty-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            background-color: #e3f2fd;
+        }
+        
+        .difficulty-option.selected {
+            background-color: #bbdefb;
+            font-weight: bold;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .difficulty-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1976d2;
+        }
+        
+        .difficulty-desc {
+            font-size: 0.9em;
+            color: #555;
+        }
+        
+        /* 成就样式 */
+        #achievements-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #achievements-content {
+            background-color: #f1f8e9;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .achievement-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .achievement-icon {
+            font-size: 30px;
+            margin-right: 15px;
+            width: 50px;
+            text-align: center;
+            color: #ff8f00;
+        }
+        
+        .achievement-details {
+            flex: 1;
+        }
+        
+        .achievement-locked {
+            opacity: 0.5;
+            background-color: #f5f5f5;
+        }
+        
+        .achievement-progress {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .achievement-reward {
+            font-size: 0.9em;
+            color: #4caf50;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        /* 升级菜单样式 */
+        #upgrade-menu {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            padding: 10px;
+            z-index: 20;
+            width: 200px;
+            border: 2px solid #81c784;
+        }
+        
+        .upgrade-option {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+        
+        .upgrade-option:hover {
+            background-color: #e8f5e9;
+            transform: translateX(5px);
+        }
+        
+        .upgrade-cost {
+            float: right;
+            color: #ff8f00;
+            font-weight: bold;
+        }
+        
+        .upgrade-separator {
+            border-top: 1px solid #ddd;
+            margin: 8px 0;
+        }
+        
+        /* 特殊波次提示 */
+        .special-wave {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #ffeb3b, #ffc107);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #d32f2f;
+            z-index: 30;
+            animation: pulse 1s infinite;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        /* 音效控制 */
+        #sound-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(to bottom, #81c784, #66bb6a);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 50;
+            transition: all 0.3s;
+        }
+        
+        #sound-control:hover {
+            transform: scale(1.1);
+        }
+        
+        /* 音量控制 */
+        #volume-control {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 50;
+            display: none;
+        }
+        
+        #volume-slider {
+            width: 100px;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #81c784, #4caf50);
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ff8f00;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* 游戏背景装饰 */
+        .decoration {
+            position: absolute;
+            font-size: 30px;
+            opacity: 0.2;
+            z-index: 1;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(20px); }
+            50% { transform: translateY(0) translateX(40px); }
+            75% { transform: translateY(20px) translateX(20px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+        
+        /* 新炮台解锁通知 */
+        .unlock-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 200;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s forwards, fadeOut 0.5s 2.5s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { top: -100px; }
+            to { top: 20px; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1 id="game-title">🥕 胡萝卜塔防 🥕</h1>
+        
+        <div id="game-info">
+            <div>生命: <span id="lives">10</span></div>
+            <div>金币: <span id="money">100</span></div>
+            <div>波数: <span id="wave">0</span>/<span id="max-wave">0</span></div>
+            <div>难度: <span id="difficulty">普通</span></div>
+            <div>成就: <span id="achievement-count">0</span></div>
+        </div>
+        
+        <div id="tower-selector">
+            <div class="tower-option pea-shooter" title="豌豆射手 - 花费: 30" onclick="selectTower('pea-shooter')">
+                🌱
+                <div class="tower-cost">30</div>
+            </div>
+            <div class="tower-option pepper-thrower" title="辣椒投手 - 花费: 50" onclick="selectTower('pepper-thrower')">
+                🌶️
+                <div class="tower-cost">50</div>
+            </div>
+            <div class="tower-option onion-guard" title="洋葱守卫 - 花费: 40" onclick="selectTower('onion-guard')">
+                🧅
+                <div class="tower-cost">40</div>
+            </div>
+            <div class="tower-option corn-cannon" title="玉米炮台 - 花费: 70" onclick="selectTower('corn-cannon')">
+                🌽
+                <div class="tower-cost">70</div>
+            </div>
+            <div class="tower-option potato-mine" title="土豆地雷 - 花费: 60" onclick="selectTower('potato-mine')">
+                🥔
+                <div class="tower-cost">60</div>
+            </div>
+            <div class="tower-option garlic-tower" title="大蒜塔 - 花费: 45" onclick="selectTower('garlic-tower')">
+                🧄
+                <div class="tower-cost">45</div>
+            </div>
+            <div class="tower-option cabbage-pult" title="卷心菜投手 - 花费: 55" onclick="selectTower('cabbage-pult')">
+                🥬
+                <div class="tower-cost">55</div>
+            </div>
+            <div class="tower-option melon-pult" title="西瓜投手 - 花费: 80" onclick="selectTower('melon-pult')">
+                🍉
+                <div class="tower-cost">80</div>
+            </div>
+            <div class="tower-option sunflower" title="向日葵 - 花费: 25" onclick="selectTower('sunflower')">
+                🌻
+                <div class="tower-cost">25</div>
+            </div>
+            
+            <!-- 成就解锁的新炮台 -->
+            <div class="tower-option strawberry locked" title="草莓射手 - 花费: 65 (成就解锁)" onclick="selectLockedTower('strawberry', '建造10座防御塔')">
+                🍓
+                <div class="tower-cost">65</div>
+            </div>
+            <div class="tower-option pineapple locked" title="菠萝炸弹 - 花费: 90 (成就解锁)" onclick="selectLockedTower('pineapple', '累计获得1000金币')">
+                🍍
+                <div class="tower-cost">90</div>
+            </div>
+            <div class="tower-option cactus locked" title="仙人掌射手 - 花费: 70 (成就解锁)" onclick="selectLockedTower('cactus', '困难模式完成15波')">
+                🌵
+                <div class="tower-cost">70</div>
+            </div>
+            <div class="tower-option mushroom locked" title="蘑菇云 - 花费: 100 (成就解锁)" onclick="selectLockedTower('mushroom', '击败100个敌人')">
+                ☁️
+                <div class="tower-cost">100</div>
+            </div>
+        </div>
+        
+        <div id="game-board">
+            <div id="carrot">🥕</div>
+            <!-- 新的蜿蜒路径 -->
+            <div class="path" id="path1"></div>
+            <div class="path" id="path2"></div>
+            <div class="path" id="path3"></div>
+            <div class="path" id="path4"></div>
+            <div class="path" id="path5"></div>
+            <div class="path" id="path6"></div>
+            <div class="path" id="path7"></div>
+            <div class="path" id="path8"></div>
+            <div class="path" id="path9"></div>
+            
+            <!-- 背景装饰 -->
+            <div class="decoration" style="top: 50px; left: 100px;">🌿</div>
+            <div class="decoration" style="top: 150px; left: 500px; animation-delay: -5s;">🍃</div>
+            <div class="decoration" style="top: 300px; left: 200px; animation-delay: -10s;">🌱</div>
+        </div>
+        
+        <div id="controls">
+            <button id="start-button" class="game-button" onclick="startWave()">开始波次</button>
+            <button id="pause-button" class="game-button" onclick="togglePause()">暂停</button>
+            <button id="restart-button" class="game-button" onclick="restartGame()">重新开始</button>
+            <button id="handbook-button" class="game-button" onclick="openHandbook()">图鉴</button>
+            <button id="achievements-button" class="game-button" onclick="openAchievements()">成就</button>
+            <button id="difficulty-button" class="game-button" onclick="openDifficultyModal()">难度</button>
+        </div>
+        
+        <div id="message"></div>
+    </div>
+
+    <!-- 图鉴模态框 -->
+    <div id="handbook-modal">
+        <div id="handbook-content">
+            <h2>游戏图鉴</h2>
+            
+            <div class="handbook-section">
+                <h3>防御塔</h3>
+                
+                <!-- 原有炮台 -->
+                <div class="handbook-item">
+                    <div class="handbook-icon">🌱</div>
+                    <div class="handbook-details">
+                        <h4>豌豆射手</h4>
+                        <p><strong>花费:</strong> 30金币</p>
+                        <p><strong>伤害:</strong> 10 (+2/级)</p>
+                        <p><strong>射程:</strong> 150 (+10/级)</p>
+                        <p><strong>攻击速度:</strong> 中等</p>
+                        <p><strong>特性:</strong> 基础攻击塔，发射豌豆进行直线攻击</p>
+                    </div>
+                </div>
+                
+              <div class="handbook-item">
+                    <div class="handbook-icon">🌶️</div>
+                    <div class="handbook-details">
+                        <h4>辣椒投手</h4>
+                        <p><strong>花费:</strong> 50金币</p>
+                        <p><strong>伤害:</strong> 25 (+5/级)</p>
+                        <p><strong>射程:</strong> 120 (+5/级)</p>
+                        <p><strong>攻击速度:</strong> 慢</p>
+                        <p><strong>特性:</strong> 投掷爆炸辣椒造成范围伤害</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🧅</div>
+                    <div class="handbook-details">
+                        <h4>洋葱守卫</h4>
+                        <p><strong>花费:</strong> 40金币</p>
+                        <p><strong>伤害:</strong> 5 (+1/级)</p>
+                        <p><strong>射程:</strong> 100 (+5/级)</p>
+                        <p><strong>攻击速度:</strong> 快</p>
+                        <p><strong>特性:</strong> 快速攻击，能有效减缓敌人速度</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🌽</div>
+                    <div class="handbook-details">
+                        <h4>玉米炮台</h4>
+                        <p><strong>花费:</strong> 70金币</p>
+                        <p><strong>伤害:</strong> 40 (+8/级)</p>
+                        <p><strong>射程:</strong> 180 (+10/级)</p>
+                        <p><strong>攻击速度:</strong> 很慢</p>
+                        <p><strong>特性:</strong> 高伤害，能攻击飞行敌人</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🥔</div>
+                    <div class="handbook-details">
+                        <h4>土豆地雷</h4>
+                        <p><strong>花费:</strong> 60金币</p>
+                        <p><strong>伤害:</strong> 100 (+20/级)</p>
+                        <p><strong>射程:</strong> 无</p>
+                        <p><strong>准备时间:</strong> 3秒</p>
+                        <p><strong>特性:</strong> 一次性高伤害陷阱，敌人靠近时爆炸</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🧄</div>
+                    <div class="handbook-details">
+                        <h4>大蒜塔</h4>
+                        <p><strong>花费:</strong> 45金币</p>
+                        <p><strong>伤害:</strong> 8 (+2/级)</p>
+                        <p><strong>射程:</strong> 90 (+5/级)</p>
+                        <p><strong>攻击速度:</strong> 中等</p>
+                        <p><strong>特性:</strong> 攻击会使敌人短暂眩晕</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🥬</div>
+                    <div class="handbook-details">
+                        <h4>卷心菜投手</h4>
+                        <p><strong>花费:</strong> 55金币</p>
+                        <p><strong>伤害:</strong> 15 (+3/级)</p>
+                        <p><strong>射程:</strong> 140 (+5/级)</p>
+                        <p><strong>攻击速度:</strong> 中等</p>
+                        <p><strong>特性:</strong> 投掷卷心菜，有几率造成双倍伤害</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🍉</div>
+                    <div class="handbook-details">
+                        <h4>西瓜投手</h4>
+                        <p><strong>花费:</strong> 80金币</p>
+                        <p><strong>伤害:</strong> 35 (+7/级)</p>
+                        <p><strong>射程:</strong> 160 (+5/级)</p>
+                        <p><strong>攻击速度:</strong> 慢</p>
+                        <p><strong>特性:</strong> 投掷西瓜造成范围溅射伤害</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🌻</div>
+                    <div class="handbook-details">
+                        <h4>向日葵</h4>
+                        <p><strong>花费:</strong> 25金币</p>
+                        <p><strong>伤害:</strong> 无</p>
+                        <p><strong>射程:</strong> 无</p>
+                        <p><strong>特性:</strong> 每10秒产生5金币 (+1/级)</p>
+                    </div>
+                </div>
+            </div>
+                
+                <!-- 新炮台 - 需要成就解锁 -->
+                <div class="handbook-item locked-item">
+                    <div class="lock-icon">🔒</div>
+                    <div class="handbook-icon">🍓</div>
+                    <div class="handbook-details">
+                        <h4>草莓射手</h4>
+                        <p><strong>花费:</strong> 65金币</p>
+                        <p><strong>伤害:</strong> 18 (+4/级)</p>
+                        <p><strong>射程:</strong> 140 (+10/级)</p>
+                        <p><strong>攻击速度:</strong> 中等</p>
+                        <p><strong>特性:</strong> 发射草莓，有几率使敌人中毒（持续伤害）</p>
+                        <p><strong>解锁条件:</strong> 建造10座防御塔</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item locked-item">
+                    <div class="lock-icon">🔒</div>
+                    <div class="handbook-icon">🍍</div>
+                    <div class="handbook-details">
+                        <h4>菠萝炸弹</h4>
+                        <p><strong>花费:</strong> 90金币</p>
+                        <p><strong>伤害:</strong> 60 (+12/级)</p>
+                        <p><strong>射程:</strong> 130 (+5/级)</p>
+                        <p><strong>攻击速度:</strong> 慢</p>
+                        <p><strong>特性:</strong> 投掷菠萝造成大范围爆炸伤害</p>
+                        <p><strong>解锁条件:</strong> 累计获得1000金币</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item locked-item">
+                    <div class="lock-icon">🔒</div>
+                    <div class="handbook-icon">🌵</div>
+                    <div class="handbook-details">
+                        <h4>仙人掌射手</h4>
+                        <p><strong>花费:</strong> 70金币</p>
+                        <p><strong>伤害:</strong> 15 (+3/级)</p>
+                        <p><strong>射程:</strong> 180 (+10/级)</p>
+                        <p><strong>攻击速度:</strong> 快</p>
+                        <p><strong>特性:</strong> 可以攻击飞行和地面单位，有几率穿透敌人</p>
+                        <p><strong>解锁条件:</strong> 困难模式完成15波</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item locked-item">
+                    <div class="lock-icon">🔒</div>
+                    <div class="handbook-icon">☁️</div>
+                    <div class="handbook-details">
+                        <h4>蘑菇云</h4>
+                        <p><strong>花费:</strong> 100金币</p>
+                        <p><strong>伤害:</strong> 80 (+15/级)</p>
+                        <p><strong>射程:</strong> 200 (+10/级)</p>
+                        <p><strong>攻击速度:</strong> 很慢</p>
+                        <p><strong>特性:</strong> 发射蘑菇云，造成巨大范围伤害并减速敌人</p>
+                        <p><strong>解锁条件:</strong> 击败100个敌人</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="handbook-section">
+                <h3>敌人</h3>
+                
+                <!-- 原有敌人 -->
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐛</div>
+                    <div class="handbook-details">
+                        <h4>蚜虫</h4>
+                        <p><strong>生命值:</strong> 30 (随波数增加)</p>
+                        <p><strong>速度:</strong> 慢</p>
+                        <p><strong>奖励:</strong> 5金币</p>
+                        <p><strong>特性:</strong> 基础敌人，数量多</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐇</div>
+                    <div class="handbook-details">
+                        <h4>兔子</h4>
+                        <p><strong>生命值:</strong> 50 (随波数增加)</p>
+                        <p><strong>速度:</strong> 快</p>
+                        <p><strong>奖励:</strong> 10金币</p>
+                        <p><strong>特性:</strong> 移动速度快</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐀</div>
+                    <div class="handbook-details">
+                        <h4>地鼠</h4>
+                        <p><strong>生命值:</strong> 80 (随波数增加)</p>
+                        <p><strong>速度:</strong> 中等</p>
+                        <p><strong>奖励:</strong> 15金币</p>
+                        <p><strong>特性:</strong> 高生命值</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐦</div>
+                    <div class="handbook-details">
+                        <h4>乌鸦</h4>
+                        <p><strong>生命值:</strong> 60 (随波数增加)</p>
+                        <p><strong>速度:</strong> 中等</p>
+                        <p><strong>奖励:</strong> 12金币</p>
+                        <p><strong>特性:</strong> 飞行单位，只能被玉米炮台和西瓜投手攻击</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐌</div>
+                    <div class="handbook-details">
+                        <h4>蜗牛</h4>
+                        <p><strong>生命值:</strong> 120 (随波数增加)</p>
+                        <p><strong>速度:</strong> 很慢</p>
+                        <p><strong>奖励:</strong> 20金币</p>
+                        <p><strong>特性:</strong> 超高生命值，移动缓慢</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🦗</div>
+                    <div class="handbook-details">
+                        <h4>蝗虫</h4>
+                        <p><strong>生命值:</strong> 40 (随波数增加)</p>
+                        <p><strong>速度:</strong> 很快</p>
+                        <p><strong>奖励:</strong> 8金币</p>
+                        <p><strong>特性:</strong> 移动非常快，低生命值</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🦎</div>
+                    <div class="handbook-details">
+                        <h4>蜥蜴</h4>
+                        <p><strong>生命值:</strong> 70 (随波数增加)</p>
+                        <p><strong>速度:</strong> 中等</p>
+                        <p><strong>奖励:</strong> 14金币</p>
+                        <p><strong>特性:</strong> 有一定几率闪避攻击</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐝</div>
+                    <div class="handbook-details">
+                        <h4>蜜蜂</h4>
+                        <p><strong>生命值:</strong> 45 (随波数增加)</p>
+                        <p><strong>速度:</strong> 快</p>
+                        <p><strong>奖励:</strong> 10金币</p>
+                        <p><strong>特性:</strong> 飞行单位，能攻击防御塔</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐜</div>
+                    <div class="handbook-details">
+                        <h4>蚂蚁</h4>
+                        <p><strong>生命值:</strong> 25 (随波数增加)</p>
+                        <p><strong>速度:</strong> 中等</p>
+                        <p><strong>奖励:</strong> 5金币</p>
+                        <p><strong>特性:</strong> 成群出现，每次生成3-5只</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🦂</div>
+                    <div class="handbook-details">
+                        <h4>蝎子</h4>
+                        <p><strong>生命值:</strong> 90 (随波数增加)</p>
+                        <p><strong>速度:</strong> 慢</p>
+                        <p><strong>奖励:</strong> 18金币</p>
+                        <p><strong>特性:</strong> 攻击会使防御塔暂时失效</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐺</div>
+                    <div class="handbook-details">
+                        <h4>狼</h4>
+                        <p><strong>生命值:</strong> 150 (随波数增加)</p>
+                        <p><strong>速度:</strong> 快</p>
+                        <p><strong>奖励:</strong> 25金币</p>
+                        <p><strong>特性:</strong> 高生命值高速度，特殊波次出现，对胡萝卜造成2.5倍伤害</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div cla
+                
+                <!-- 新敌人 - 后期出现 -->
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐲</div>
+                    <div class="handbook-details">
+                        <h4>巨龙</h4>
+                        <p><strong>出现波次:</strong> 15+</p>
+                        <p><strong>生命值:</strong> 200 (随波数增加)</p>
+                        <p><strong>速度:</strong> 中等</p>
+                        <p><strong>奖励:</strong> 50金币</p>
+                        <p><strong>特性:</strong> 飞行单位，对防御塔造成额外伤害</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🧙</div>
+                    <div class="handbook-details">
+                        <h4>魔法兔</h4>
+                        <p><strong>出现波次:</strong> 12+</p>
+                        <p><strong>生命值:</strong> 100 (随波数增加)</p>
+                        <p><strong>速度:</strong> 慢</p>
+                        <p><strong>奖励:</strong> 25金币</p>
+                        <p><strong>特性:</strong> 召唤小兔分身，降低附近防御塔攻击速度</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐞</div>
+                    <div class="handbook-details">
+                        <h4>装甲虫</h4>
+                        <p><strong>出现波次:</strong> 10+</p>
+                        <p><strong>生命值:</strong> 150 (随波数增加)</p>
+                        <p><strong>速度:</strong> 慢</p>
+                        <p><strong>奖励:</strong> 30金币</p>
+                        <p><strong>特性:</strong> 高防御，减少受到的伤害</p>
+                    </div>
+                </div>
+                
+                <div class="handbook-item">
+                    <div class="handbook-icon">🐌🧪</div>
+                    <div class="handbook-details">
+                        <h4>毒液蜗牛</h4>
+                        <p><strong>出现波次:</strong> 8+</p>
+                        <p><strong>生命值:</strong> 90 (随波数增加)</p>
+                        <p><strong>速度:</strong> 很慢</p>
+                        <p><strong>奖励:</strong> 20金币</p>
+                        <p><strong>特性:</strong> 留下毒液路径，对经过的敌人提供增益</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="close-button" onclick="closeHandbook()">关闭图鉴</button>
+        </div>
+    </div>
+
+    <!-- 难度选择模态框 -->
+    <div id="difficulty-modal">
+        <div id="difficulty-content">
+            <h2>选择游戏难度</h2>
+            
+            <div class="difficulty-option" onclick="setDifficulty('easy')">
+                <div class="difficulty-title">简单模式</div>
+                <div class="difficulty-desc">敌人较弱，适合新手玩家</div>
+            </div>
+            
+            <div class="difficulty-option selected" onclick="setDifficulty('normal')">
+                <div class="difficulty-title">普通模式</div>
+                <div class="difficulty-desc">标准难度，平衡的游戏体验</div>
+            </div>
+            
+            <div class="difficulty-option" onclick="setDifficulty('hard')">
+                <div class="difficulty-title">困难模式</div>
+                <div class="difficulty-desc">敌人更强，适合挑战自我的玩家</div>
+            </div>
+            
+            <button class="close-button" onclick="closeDifficultyModal()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 成就模态框 -->
+    <div id="achievements-modal">
+        <div id="achievements-content">
+            <h2>游戏成就</h2>
+            
+            <div id="achievements-list">
+                <!-- 成就将通过JavaScript动态添加 -->
+            </div>
+            
+            <button class="close-button" onclick="closeAchievements()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 升级菜单 -->
+    <div id="upgrade-menu">
+        <div id="upgrade-options">
+            <!-- 升级选项将通过JavaScript动态添加 -->
+        </div>
+        <div class="upgrade-separator"></div>
+        <div class="upgrade-option" onclick="sellTower()">出售 (<span id="sell-value">0</span>金币)</div>
+    </div>
+
+    <!-- 音效控制按钮 -->
+    <button id="sound-control" onclick="toggleSound()">🔊</button>
+    
+    <!-- 音量控制 -->
+    <div id="volume-control">
+        <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.3">
+    </div>
+
+    <script>
+        // 游戏变量
+        let selectedTowerType = null;
+        let towers = [];
+        let enemies = [];
+        let projectiles = [];
+        let money = 100;
+        let lives = 10;
+        let wave = 0;
+        let maxWave = 0;
+        let gameRunning = false;
+        let gamePaused = false;
+        let towerElements = [];
+        let enemyElements = [];
+        let projectileElements = [];
+        let difficulty = 'normal';
+        let sunflowerInterval;
+        let soundEnabled = true;
+        let achievements = [];
+        let selectedTowerForUpgrade = null;
+        let unlockedTowers = {
+            'strawberry': false,
+            'pineapple': false,
+            'cactus': false,
+            'mushroom': false
+        };
+        
+        // 音效
+        const sounds = {
+            placeTower: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3'),
+            enemyDefeated: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-explosion-2759.mp3'),
+            towerAttack: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-short-laser-gun-shot-1670.mp3'),
+            gameOver: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.mp3'),
+            waveStart: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'),
+            upgrade: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3'),
+            click: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3'),
+            sell: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cash-register-printing-receipt-2583.mp3'),
+            unlock: new Audio('https://assets.mixkit.co/sfx/preview/mixkit-game-level-completed-2059.mp3')
+        };
+        
+        // 初始化音效
+        Object.values(sounds).forEach(sound => {
+            sound.volume = 0.3;
+        });
+        
+        // 难度设置
+        const difficultySettings = {
+            easy: { 
+                enemyHealthMultiplier: 0.8,
+                enemySpeedMultiplier: 0.9,
+                startingMoney: 150,
+                startingLives: 15,
+                rewardMultiplier: 1.2,
+                towerCostMultiplier: 0.9,
+                upgradeCostMultiplier: 0.8
+            },
+            normal: { 
+                enemyHealthMultiplier: 1,
+                enemySpeedMultiplier: 1,
+                startingMoney: 100,
+                startingLives: 10,
+                rewardMultiplier: 1,
+                towerCostMultiplier: 1,
+                upgradeCostMultiplier: 1
+            },
+            hard: { 
+                enemyHealthMultiplier: 1.3,
+                enemySpeedMultiplier: 1.2,
+                startingMoney: 70,
+                startingLives: 7,
+                rewardMultiplier: 0.8,
+                towerCostMultiplier: 1.1,
+                upgradeCostMultiplier: 1.2
+            }
+        };
+        
+        // 塔防数据
+        const towerData = {
+            'pea-shooter': { 
+                name: '豌豆射手',
+                cost: 30, 
+                damage: 10, 
+                range: 150, 
+                cooldown: 1000, 
+                emoji: '🌱',
+                damagePerLevel: 2,
+                rangePerLevel: 10,
+                upgradeCost: 20
+            },
+            'pepper-thrower': { 
+                name: '辣椒投手',
+                cost: 50, 
+                damage: 25, 
+                range: 120, 
+                cooldown: 1500, 
+                emoji: '🌶️',
+                damagePerLevel: 5,
+                rangePerLevel: 5,
+                upgradeCost: 30
+            },
+            'onion-guard': { 
+                name: '洋葱守卫',
+                cost: 40, 
+                damage: 5, 
+                range: 100, 
+                cooldown: 800, 
+                emoji: '🧅',
+                damagePerLevel: 1,
+                rangePerLevel: 5,
+                upgradeCost: 25
+            },
+            'corn-cannon': { 
+                name: '玉米炮台',
+                cost: 70, 
+                damage: 40, 
+                range: 180, 
+                cooldown: 2000, 
+                emoji: '🌽',
+                damagePerLevel: 8,
+                rangePerLevel: 10,
+                upgradeCost: 40
+            },
+            'potato-mine': { 
+                name: '土豆地雷',
+                cost: 60, 
+                damage: 100, 
+                range: 0, 
+                cooldown: 0, 
+                emoji: '🥔', 
+                isMine: true,
+                damagePerLevel: 20,
+                upgradeCost: 35
+            },
+            'garlic-tower': { 
+                name: '大蒜塔',
+                cost: 45, 
+                damage: 8, 
+                range: 90, 
+                cooldown: 1200, 
+                emoji: '🧄', 
+                stunDuration: 500,
+                damagePerLevel: 2,
+                rangePerLevel: 5,
+                upgradeCost: 25,
+                stunPerLevel: 100
+            },
+            'cabbage-pult': { 
+                name: '卷心菜投手',
+                cost: 55, 
+                damage: 15, 
+                range: 140, 
+                cooldown: 1500, 
+                emoji: '🥬', 
+                critChance: 0.3,
+                damagePerLevel: 3,
+                rangePerLevel: 5,
+                upgradeCost: 30,
+                critPerLevel: 0.05
+            },
+            'melon-pult': { 
+                name: '西瓜投手',
+                cost: 80, 
+                damage: 35, 
+                range: 160, 
+                cooldown: 2000, 
+                emoji: '🍉', 
+                splashRadius: 50,
+                damagePerLevel: 7,
+                rangePerLevel: 5,
+                upgradeCost: 45,
+                splashPerLevel: 5
+            },
+            'sunflower': { 
+                name: '向日葵',
+                cost: 25, 
+                damage: 0, 
+                range: 0, 
+                cooldown: 0, 
+                emoji: '🌻', 
+                income: 5, 
+                incomeInterval: 10000,
+                incomePerLevel: 1,
+                upgradeCost: 15
+            },
+            // 新炮台数据
+            'strawberry': { 
+                name: '草莓射手',
+                cost: 65, 
+                damage: 18, 
+                range: 140, 
+                cooldown: 1200, 
+                emoji: '🍓',
+                damagePerLevel: 4,
+                rangePerLevel: 10,
+                upgradeCost: 35,
+                poisonChance: 0.4,
+                poisonDuration: 3000,
+                poisonDamage: 3
+            },
+            'pineapple': { 
+                name: '菠萝炸弹',
+                cost: 90, 
+                damage: 60, 
+                range: 130, 
+                cooldown: 2500, 
+                emoji: '🍍',
+                damagePerLevel: 12,
+                rangePerLevel: 5,
+                upgradeCost: 50,
+                splashRadius: 70
+            },
+            'cactus': { 
+                name: '仙人掌射手',
+                cost: 70, 
+                damage: 15, 
+                range: 180, 
+                cooldown: 700, 
+                emoji: '🌵',
+                damagePerLevel: 3,
+                rangePerLevel: 10,
+                upgradeCost: 40,
+                pierceChance: 0.3
+            },
+            'mushroom': { 
+                name: '蘑菇云',
+                cost: 100, 
+                damage: 80, 
+                range: 200, 
+                cooldown: 3000, 
+                emoji: '☁️',
+                damagePerLevel: 15,
+                rangePerLevel: 10,
+                upgradeCost: 60,
+                splashRadius: 100,
+                slowEffect: 0.5,
+                slowDuration: 3000
+            }
+        };
+        
+        // 新的敌人行进路径（更蜿蜒）
+        const path = [
+            { x: 50, y: 115 },     // 起点
+            { x: 150, y: 115 },    // 第一段
+            { x: 150, y: 165 },    // 第一个转弯
+            { x: 250, y: 165 },    // 第二段
+            { x: 250, y: 215 },    // 第二个转弯
+            { x: 350, y: 215 },    // 第三段
+            { x: 350, y: 265 },    // 第三个转弯
+            { x: 450, y: 265 },    // 第四段
+            { x: 450, y: 315 },    // 第四个转弯
+            { x: 550, y: 315 }     // 终点（胡萝卜位置）
+        ];
+        
+        // 成就系统
+        const achievementData = [
+            { id: 'first_blood', name: '第一滴血', description: '击败第一个敌人', icon: '🩸', condition: (game) => game.enemiesDefeated >= 1, unlockTower: null },
+            { id: 'tower_master', name: '塔防大师', description: '建造10座防御塔', icon: '🏰', condition: (game) => game.towersBuilt >= 10, unlockTower: 'strawberry' },
+            { id: 'wave_10', name: '十波挑战', description: '完成第10波', icon: '🔟', condition: (game) => game.wave >= 10, unlockTower: null },
+            { id: 'wave_20', name: '二十波挑战', description: '完成第20波', icon: '2️⃣0️⃣', condition: (game) => game.wave >= 20, unlockTower: null },
+            { id: 'rich', name: '富可敌国', description: '累计获得1000金币', icon: '💰', condition: (game) => game.totalMoneyEarned >= 1000, unlockTower: 'pineapple' },
+            { id: 'sunflower_field', name: '向日葵田', description: '建造5个向日葵', icon: '🌻', condition: (game) => game.sunflowersBuilt >= 5, unlockTower: null },
+            { id: 'perfectionist', name: '完美主义者', description: '完成一波而不损失生命', icon: '💯', condition: (game) => game.perfectWaves >= 1, unlockTower: null },
+            { id: 'speed_runner', name: '速通玩家', description: '在5分钟内完成10波', icon: '⏱️', condition: (game) => game.wave >= 10 && game.gameTime < 300000, unlockTower: null },
+            { id: 'hard_mode', name: '硬核玩家', description: '在困难模式下完成15波', icon: '💀', condition: (game) => game.wave >= 15 && game.difficulty === 'hard', unlockTower: 'cactus' },
+            { id: 'upgrade_king', name: '升级之王', description: '升级10次防御塔', icon: '⬆️', condition: (game) => game.towersUpgraded >= 10, unlockTower: null },
+            { id: 'enemy_slayer', name: '敌人杀手', description: '击败100个敌人', icon: '⚔️', condition: (game) => game.enemiesDefeated >= 100, unlockTower: 'mushroom' }
+        ];
+        
+        // 游戏统计
+        const gameStats = {
+            enemiesDefeated: 0,
+            towersBuilt: 0,
+            totalMoneyEarned: 100,
+            sunflowersBuilt: 0,
+            perfectWaves: 0,
+            gameTime: 0,
+            difficulty: 'normal',
+            towersUpgraded: 0,
+            achievementsUnlocked: 0
+        };
+        
+        // 初始化游戏
+        function initGame() {
+            // 清除所有游戏元素
+            clearGameElements();
+            
+            // 重置游戏状态
+            selectedTowerType = null;
+            towers = [];
+            enemies = [];
+            projectiles = [];
+            money = difficultySettings[difficulty].startingMoney;
+            lives = difficultySettings[difficulty].startingLives;
+            wave = 0;
+            gameRunning = false;
+            gamePaused = false;
+            gameStats.gameTime = 0;
+            
+            // 重置游戏统计
+            gameStats.enemiesDefeated = 0;
+            gameStats.towersBuilt = 0;
+            gameStats.totalMoneyEarned = difficultySettings[difficulty].startingMoney;
+            gameStats.sunflowersBuilt = 0;
+            gameStats.perfectWaves = 0;
+            gameStats.towersUpgraded = 0;
+            gameStats.difficulty = difficulty;
+            gameStats.achievementsUnlocked = 0;
+            achievements = [];
+            
+            // 重置解锁的炮台
+            unlockedTowers = {
+                'strawberry': false,
+                'pineapple': false,
+                'cactus': false,
+                'mushroom': false
+            };
+            updateTowerSelector();
+            
+            // 清除向日葵收入间隔
+            if (sunflowerInterval) {
+                clearInterval(sunflowerInterval);
+                sunflowerInterval = null;
+            }
+            
+            // 更新UI
+            updateGameInfo();
+            document.getElementById('start-button').disabled = false;
+            document.getElementById('pause-button').textContent = '暂停';
+            document.querySelectorAll('.tower-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            showMessage("游戏已准备就绪! 选择防御塔开始游戏");
+            
+            // 播放点击音效
+            playSound('click');
+        }
+        
+        // 清除所有游戏元素
+        function clearGameElements() {
+            // 清除所有塔
+            towerElements.forEach(el => {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+            towerElements = [];
+            
+            // 清除所有敌人
+            enemyElements.forEach(el => {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+            enemyElements = [];
+            
+            // 清除所有投射物
+            projectileElements.forEach(el => {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+            projectileElements = [];
+            
+            // 清除游戏循环
+            if (window.gameLoop) {
+                clearInterval(window.gameLoop);
+                window.gameLoop = null;
+            }
+        }
+        
+        // 重新开始游戏
+        function restartGame() {
+            if (confirm("确定要重新开始游戏吗？当前进度将丢失。")) {
+                playSound('click');
+                initGame();
+            }
+        }
+        
+        // 打开图鉴
+        function openHandbook() {
+            document.getElementById('handbook-modal').style.display = 'flex';
+            playSound('click');
+        }
+        
+        // 关闭图鉴
+        function closeHandbook() {
+            document.getElementById('handbook-modal').style.display = 'none';
+            playSound('click');
+        }
+        
+        // 打开成就
+        function openAchievements() {
+            const list = document.getElementById('achievements-list');
+            list.innerHTML = '';
+            
+            achievementData.forEach(ach => {
+                const achieved = achievements.includes(ach.id);
+                const progress = ach.condition(gameStats);
+                
+                const item = document.createElement('div');
+                item.className = `achievement-item ${achieved ? '' : 'achievement-locked'}`;
+                
+                let rewardText = '';
+                if (ach.unlockTower) {
+                    rewardText = `<div class="achievement-reward">解锁: ${towerData[ach.unlockTower].name} ${towerData[ach.unlockTower].emoji}</div>`;
+                }
+                
+                item.innerHTML = `
+                    <div class="achievement-icon">${ach.icon}</div>
+                    <div class="achievement-details">
+                        <h4>${ach.name}</h4>
+                        <p>${ach.description}</p>
+                        ${rewardText}
+                        ${!achieved && typeof progress === 'number' ? 
+                            `<div class="achievement-progress">进度: ${Math.min(100, Math.round(progress * 100))}%</div>` : ''}
+                    </div>
+                `;
+                
+                list.appendChild(item);
+            });
+            
+            document.getElementById('achievements-modal').style.display = 'flex';
+            playSound('click');
+        }
+        
+        // 关闭成就
+        function closeAchievements() {
+            document.getElementById('achievements-modal').style.display = 'none';
+            playSound('click');
+        }
+        
+        // 打开难度选择
+        function openDifficultyModal() {
+            document.getElementById('difficulty-modal').style.display = 'flex';
+            // 更新当前选择的难度
+            document.querySelectorAll('.difficulty-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`.difficulty-option:nth-child(${
+                difficulty === 'easy' ? 1 : difficulty === 'normal' ? 2 : 3
+            })`).classList.add('selected');
+            playSound('click');
+        }
+        
+        // 关闭难度选择
+        function closeDifficultyModal() {
+            document.getElementById('difficulty-modal').style.display = 'none';
+            playSound('click');
+        }
+        
+        // 设置难度
+        function setDifficulty(level) {
+            difficulty = level;
+            document.getElementById('difficulty').textContent = 
+                level === 'easy' ? '简单' : level === 'normal' ? '普通' : '困难';
+            gameStats.difficulty = level;
+            closeDifficultyModal();
+            initGame();
+        }
+        
+        // 选择防御塔
+        function selectTower(type) {
+            selectedTowerType = type;
+            document.querySelectorAll('.tower-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`.tower-option.${type}`).classList.add('selected');
+            showMessage(`已选择: ${towerData[type].name} (花费: ${getTowerCost(type)})`);
+            playSound('click');
+        }
+        
+        // 选择锁定的防御塔
+        function selectLockedTower(type, condition) {
+            showMessage(`需要解锁: ${condition}`);
+            playSound('click');
+        }
+        
+        // 更新炮台选择器显示
+        function updateTowerSelector() {
+            document.querySelectorAll('.tower-option').forEach(opt => {
+                const type = opt.classList[1];
+                if (unlockedTowers[type]) {
+                    opt.classList.remove('locked');
+                    opt.onclick = function() { selectTower(type); };
+                    opt.title = `${towerData[type].name} - 花费: ${getTowerCost(type)}`;
+                }
+            });
+        }
+        
+        // 获取防御塔成本（考虑难度）
+        function getTowerCost(type) {
+            return Math.round(towerData[type].cost * difficultySettings[difficulty].towerCostMultiplier);
+        }
+        
+        // 获取升级成本（考虑难度）
+        function getUpgradeCost(type, level) {
+            return Math.round(towerData[type].upgradeCost * difficultySettings[difficulty].upgradeCostMultiplier * level);
+        }
+        
+        // 获取防御塔名称
+        function getTowerName(type) {
+            return towerData[type]?.name || type;
+        }
+        
+        // 放置防御塔
+        document.getElementById('game-board').addEventListener('click', function(e) {
+            if (!selectedTowerType || gameRunning || gamePaused) return;
+            
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // 检查是否在路径上
+            if (isOnPath(x, y)) {
+                showMessage("不能在路径上放置防御塔!");
+                return;
+            }
+            
+            // 检查是否有足够的金币
+            const cost = getTowerCost(selectedTowerType);
+            if (money < cost) {
+                showMessage("金币不足!");
+                return;
+            }
+            
+            // 检查是否与其他塔重叠
+            for (const tower of towers) {
+                const dx = tower.x - x;
+                const dy = tower.y - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 40) {
+                    showMessage("这里已经有一个防御塔了!");
+                    return;
+                }
+            }
+            
+            // 检查是否离胡萝卜太近
+            const carrotRect = document.getElementById('carrot').getBoundingClientRect();
+            const carrotX = carrotRect.left - rect.left + carrotRect.width / 2;
+            const carrotY = carrotRect.top - rect.top + carrotRect.height / 2;
+            const distanceToCarrot = Math.sqrt(Math.pow(x - carrotX, 2) + Math.pow(y - carrotY, 2));
+            if (distanceToCarrot < 60) {
+                showMessage("不能把防御塔放在胡萝卜旁边!");
+                return;
+            }
+            
+            // 检查是否离边界太近
+            if (x < 30 || x > 570 || y < 30 || y > 370) {
+                showMessage("不能把防御塔放在太靠近边缘的位置!");
+                return;
+            }
+            
+            // 创建防御塔
+            const tower = {
+                type: selectedTowerType,
+                x: x,
+                y: y,
+                level: 1,
+                cooldown: 0,
+                emoji: towerData[selectedTowerType].emoji,
+                isMine: towerData[selectedTowerType].isMine || false,
+                mineActive: false,
+                stunDuration: towerData[selectedTowerType].stunDuration || 0,
+                critChance: towerData[selectedTowerType].critChance || 0,
+                splashRadius: towerData[selectedTowerType].splashRadius || 0,
+                income: towerData[selectedTowerType].income || 0,
+                incomeInterval: towerData[selectedTowerType].incomeInterval || 0,
+                lastIncomeTime: 0,
+                disableTimer: 0,
+                damage: towerData[selectedTowerType].damage,
+                range: towerData[selectedTowerType].range,
+                // 新炮台特有属性
+                poisonChance: towerData[selectedTowerType].poisonChance || 0,
+                poisonDuration: towerData[selectedTowerType].poisonDuration || 0,
+                poisonDamage: towerData[selectedTowerType].poisonDamage || 0,
+                pierceChance: towerData[selectedTowerType].pierceChance || 0,
+                slowEffect: towerData[selectedTowerType].slowEffect || 0,
+                slowDuration: towerData[selectedTowerType].slowDuration || 0
+            };
+            
+            towers.push(tower);
+            money -= cost;
+            gameStats.towersBuilt++;
+            gameStats.totalMoneyEarned += cost;
+            
+            if (selectedTowerType === 'sunflower') {
+                gameStats.sunflowersBuilt++;
+            }
+            
+            updateGameInfo();
+            checkAchievements();
+            
+            // 在页面上显示防御塔
+            const towerElement = document.createElement('div');
+            towerElement.className = `tower ${selectedTowerType}`;
+            towerElement.style.left = `${x-25}px`;
+            towerElement.style.top = `${y-25}px`;
+            towerElement.textContent = towerData[selectedTowerType].emoji;
+            
+            // 添加等级标签
+            const levelElement = document.createElement('div');
+            levelElement.className = 'tower-level';
+            levelElement.textContent = tower.level;
+            towerElement.appendChild(levelElement);
+            
+            // 添加点击事件用于升级
+            towerElement.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (gameRunning || gamePaused) return;
+                openUpgradeMenu(tower, towerElement);
+            });
+            
+            document.getElementById('game-board').appendChild(towerElement);
+            tower.element = towerElement;
+            tower.levelElement = levelElement;
+            towerElements.push(towerElement);
+            
+            // 如果是地雷，显示不同的状态
+            if (tower.isMine) {
+                towerElement.textContent = '⏳';
+                tower.mineTimer = setTimeout(() => {
+                    tower.mineActive = true;
+                    towerElement.textContent = '💣';
+                }, 3000);
+            }
+            
+            // 如果是向日葵，开始产生收入
+            if (tower.type === 'sunflower' && !sunflowerInterval) {
+                sunflowerInterval = setInterval(produceIncome, 1000);
+            }
+            
+            showMessage(`${getTowerName(selectedTowerType)} 已放置!`);
+            playSound('placeTower');
+        });
+        
+        // 检查点是否在路径上
+        function isOnPath(x, y) {
+            // 检查所有路径段
+            const paths = [
+                { x1: 50, y1: 100, x2: 150, y2: 130 },   // 第一段水平路径
+                { x1: 150, y1: 100, x2: 180, y2: 150 },   // 第一段垂直路径
+                { x1: 150, y1: 150, x2: 250, y2: 180 },   // 第二段水平路径
+                { x1: 250, y1: 150, x2: 280, y2: 200 },   // 第二段垂直路径
+                { x1: 250, y1: 200, x2: 350, y2: 230 },   // 第三段水平路径
+                { x1: 350, y1: 200, x2: 380, y2: 250 },   // 第三段垂直路径
+                { x1: 350, y1: 250, x2: 450, y2: 280 },   // 第四段水平路径
+                { x1: 450, y1: 250, x2: 480, y2: 300 },   // 第四段垂直路径
+                { x1: 450, y1: 300, x2: 550, y2: 330 }    // 第五段水平路径
+            ];
+            
+            for (const path of paths) {
+                if (x >= path.x1 && x <= path.x2 && y >= path.y1 && y <= path.y2) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // 打开升级菜单
+        function openUpgradeMenu(tower, element) {
+            closeUpgradeMenu(); // 关闭任何已打开的升级菜单
+            
+            selectedTowerForUpgrade = tower;
+            
+            const menu = document.getElementById('upgrade-menu');
+            const options = document.getElementById('upgrade-options');
+            options.innerHTML = '';
+            
+            // 设置出售价值（原价的75%）
+            const sellValue = Math.round(getTowerCost(tower.type) * 0.75 * tower.level);
+            document.getElementById('sell-value').textContent = sellValue;
+            
+            // 添加升级选项
+            if (!tower.isMine) {
+                const upgradeCost = getUpgradeCost(tower.type, tower.level);
+                const upgradeOption = document.createElement('div');
+                upgradeOption.className = 'upgrade-option';
+                upgradeOption.innerHTML = `升级到等级 ${tower.level + 1} <span class="upgrade-cost">${upgradeCost}金币</span>`;
+                upgradeOption.onclick = function() {
+                    if (money >= upgradeCost) {
+                        upgradeTower(tower, upgradeCost);
+                    } else {
+                        showMessage("金币不足!");
+                    }
+                };
+                options.appendChild(upgradeOption);
+            }
+            
+            // 定位菜单
+            menu.style.display = 'block';
+            const boardRect = document.getElementById('game-board').getBoundingClientRect();
+            const x = tower.x + boardRect.left;
+            const y = tower.y + boardRect.top;
+            
+            // 确保菜单不会超出游戏区域
+            let left = x + 30;
+            let top = y - 20;
+            
+            if (left + 200 > window.innerWidth) {
+                left = window.innerWidth - 220;
+            }
+            
+            if (top + 100 > window.innerHeight) {
+                top = window.innerHeight - 120;
+            }
+            
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+            
+            // 点击其他地方关闭菜单
+            setTimeout(() => {
+                document.addEventListener('click', closeUpgradeMenu);
+            }, 10);
+        }
+        
+        // 关闭升级菜单
+        function closeUpgradeMenu() {
+            document.getElementById('upgrade-menu').style.display = 'none';
+            document.removeEventListener('click', closeUpgradeMenu);
+            selectedTowerForUpgrade = null;
+        }
+        
+        // 升级防御塔
+        function upgradeTower(tower, cost) {
+            money -= cost;
+            gameStats.totalMoneyEarned += cost;
+            tower.level++;
+            gameStats.towersUpgraded++;
+            
+            // 更新属性
+            tower.damage = towerData[tower.type].damage + (towerData[tower.type].damagePerLevel * (tower.level - 1));
+            if (towerData[tower.type].rangePerLevel) {
+                tower.range = towerData[tower.type].range + (towerData[tower.type].rangePerLevel * (tower.level - 1));
+            }
+            if (towerData[tower.type].incomePerLevel) {
+                tower.income = towerData[tower.type].income + (towerData[tower.type].incomePerLevel * (tower.level - 1));
+            }
+            if (towerData[tower.type].stunPerLevel) {
+                tower.stunDuration = towerData[tower.type].stunDuration + (towerData[tower.type].stunPerLevel * (tower.level - 1));
+            }
+            if (towerData[tower.type].critPerLevel) {
+                tower.critChance = towerData[tower.type].critChance + (towerData[tower.type].critPerLevel * (tower.level - 1));
+            }
+            if (towerData[tower.type].splashPerLevel) {
+                tower.splashRadius = towerData[tower.type].splashRadius + (towerData[tower.type].splashPerLevel * (tower.level - 1));
+            }
+            if (towerData[tower.type].poisonChance) {
+                tower.poisonChance = towerData[tower.type].poisonChance + (towerData[tower.type].poisonPerLevel * (tower.level - 1));
+            }
+            if (towerData[tower.type].pierceChance) {
+                tower.pierceChance = towerData[tower.type].pierceChance + (towerData[tower.type].piercePerLevel * (tower.level - 1));
+            }
+            
+            // 更新等级显示
+            tower.levelElement.textContent = tower.level;
+            
+            updateGameInfo();
+            closeUpgradeMenu();
+            showMessage(`${getTowerName(tower.type)} 已升级到等级 ${tower.level}!`);
+            playSound('upgrade');
+            checkAchievements();
+        }
+        
+        // 出售防御塔
+        function sellTower() {
+            if (!selectedTowerForUpgrade) return;
+            
+            const tower = selectedTowerForUpgrade;
+            const sellValue = Math.round(getTowerCost(tower.type) * 0.75 * tower.level);
+            
+            // 移除塔
+            const index = towers.indexOf(tower);
+            if (index !== -1) {
+                towers.splice(index, 1);
+            }
+            
+            // 移除元素
+            if (tower.element.parentNode) {
+                tower.element.parentNode.removeChild(tower.element);
+            }
+            
+            // 如果是地雷且计时器存在，清除计时器
+            if (tower.isMine && tower.mineTimer) {
+                clearTimeout(tower.mineTimer);
+            }
+            
+            money += sellValue;
+            gameStats.totalMoneyEarned += sellValue;
+            updateGameInfo();
+            closeUpgradeMenu();
+            showMessage(`已出售 ${getTowerName(tower.type)} 获得 ${sellValue}金币!`);
+            playSound('sell');
+            
+            // 检查是否还有向日葵
+            const hasSunflowers = towers.some(t => t.type === 'sunflower');
+            if (!hasSunflowers && sunflowerInterval) {
+                clearInterval(sunflowerInterval);
+                sunflowerInterval = null;
+            }
+        }
+        
+        // 向日葵产生收入
+        function produceIncome() {
+            const now = Date.now();
+            let incomeGenerated = false;
+            
+            towers.forEach(tower => {
+                if (tower.type === 'sunflower' && now - tower.lastIncomeTime >= tower.incomeInterval) {
+                    money += tower.income;
+                    gameStats.totalMoneyEarned += tower.income;
+                    tower.lastIncomeTime = now;
+                    incomeGenerated = true;
+                    
+                    // 显示收入动画
+                    const incomeText = document.createElement('div');
+                    incomeText.textContent = `+${tower.income}`;
+                    incomeText.style.position = 'absolute';
+                    incomeText.style.left = `${tower.x-10}px`;
+                    incomeText.style.top = `${tower.y-30}px`;
+                    incomeText.style.color = 'gold';
+                    incomeText.style.fontWeight = 'bold';
+                    incomeText.style.fontSize = '20px';
+                    incomeText.style.zIndex = '10';
+                    document.getElementById('game-board').appendChild(incomeText);
+                    
+                    setTimeout(() => {
+                        incomeText.style.top = `${tower.y-50}px`;
+                        incomeText.style.opacity = '0';
+                        setTimeout(() => {
+                            incomeText.remove();
+                        }, 500);
+                    }, 100);
+                }
+            });
+            
+            if (incomeGenerated) {
+                updateGameInfo();
+                checkAchievements();
+            }
+        }
+        
+        // 开始波次
+        function startWave() {
+            if (gameRunning || gamePaused) return;
+            
+            wave++;
+            if (wave > maxWave) {
+                maxWave = wave;
+            }
+            
+            updateGameInfo();
+            gameRunning = true;
+            document.getElementById('start-button').disabled = true;
+            showMessage(`第 ${wave} 波开始!`);
+            playSound('waveStart');
+            
+            // 特殊波次提示
+            if (wave % 5 === 0) {
+                const specialWave = document.createElement('div');
+                specialWave.className = 'special-wave';
+                specialWave.textContent = `特殊波次 ${wave}!`;
+                document.getElementById('game-board').appendChild(specialWave);
+                
+                setTimeout(() => {
+                    specialWave.remove();
+                }, 2000);
+            }
+            
+            // 生成敌人
+            let enemyCount = 5 + Math.floor(wave * 1.5);
+            
+            // 特殊波次有更多敌人
+            if (wave % 5 === 0) {
+                enemyCount = Math.floor(enemyCount * 1.5);
+            }
+            
+            for (let i = 0; i < enemyCount; i++) {
+                setTimeout(() => {
+                    if (lives <= 0 || gamePaused) return;
+                    createEnemy();
+                }, i * 1000);
+            }
+            
+            // 检查波次是否结束
+            setTimeout(() => {
+                gameRunning = false;
+                document.getElementById('start-button').disabled = false;
+                
+                if (lives > 0) {
+                    const waveBonus = Math.round((20 + wave * 5) * difficultySettings[difficulty].rewardMultiplier);
+                    showMessage(`第 ${wave} 波结束! 获得 ${waveBonus}金币奖励`);
+                    money += waveBonus;
+                    gameStats.totalMoneyEarned += waveBonus;
+                    
+                    // 检查是否完美波次（无生命损失）
+                    if (lives === difficultySettings[difficulty].startingLives) {
+                        gameStats.perfectWaves++;
+                        checkAchievements();
+                    }
+                    
+                    updateGameInfo();
+                    checkAchievements();
+                }
+            }, enemyCount * 1000 + 2000);
+            
+            // 开始游戏循环
+            if (!window.gameLoop) {
+                window.gameLoop = setInterval(updateGame, 16);
+            }
+        }
+        
+        // 暂停/继续游戏
+        function togglePause() {
+            gamePaused = !gamePaused;
+            
+            if (gamePaused) {
+                document.getElementById('pause-button').textContent = '继续';
+                showMessage("游戏已暂停");
+            } else {
+                document.getElementById('pause-button').textContent = '暂停';
+                showMessage("游戏已继续");
+            }
+            
+            playSound('click');
+        }
+        
+        // 切换音效
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-control').textContent = soundEnabled ? '🔊' : '🔇';
+            document.getElementById('volume-control').style.display = soundEnabled ? 'block' : 'none';
+            playSound('click');
+        }
+        
+        // 调整音量
+        document.getElementById('volume-slider').addEventListener('input', function() {
+            const volume = parseFloat(this.value);
+            Object.values(sounds).forEach(sound => {
+                sound.volume = volume;
+            });
+        });
+        
+        // 创建敌人
+        function createEnemy() {
+            const enemyTypes = ['🐛', '🐛', '🐛', '🐇', '🐇', '🐀', '🐦', '🐌', '🦗', '🦎', '🐝', '🐜', '🦂'];
+            let enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            
+            // 随着波数增加，出现更强敌人的概率增加
+            if (Math.random() < wave * 0.05) {
+                enemyType = ['🐀', '🐦', '🐌', '🦎', '🦂'][Math.floor(Math.random() * 5)];
+            }
+            
+            // 后期出现新敌人
+            if (wave >= 8 && Math.random() < 0.1) {
+                enemyType = '🐌🧪'; // 毒液蜗牛
+            }
+            if (wave >= 10 && Math.random() < 0.1) {
+                enemyType = '🐞'; // 装甲虫
+            }
+            if (wave >= 12 && Math.random() < 0.1) {
+                enemyType = '🧙'; // 魔法兔
+            }
+            if (wave >= 15 && Math.random() < 0.1) {
+                enemyType = '🐲'; // 巨龙
+            }
+            
+            // 特殊波次可能出现特殊敌人
+            if (wave % 5 === 0) {
+                if (Math.random() < 0.3) {
+                    enemyType = Math.random() < 0.5 ? '🐺' : '🦅';
+                }
+            }
+            
+            // 蚂蚁成群出现
+            if (enemyType === '🐜') {
+                const antCount = 3 + Math.floor(Math.random() * 3);
+                for (let i = 0; i < antCount; i++) {
+                    setTimeout(() => createSingleEnemy('🐜'), i * 300);
+                }
+                return;
+            }
+            
+            createSingleEnemy(enemyType);
+        }
+        
+        // 创建单个敌人
+        function createSingleEnemy(enemyType) {
+            let health, speed, reward, bossDamageMultiplier = 1;
+            const settings = difficultySettings[difficulty];
+            
+            switch(enemyType) {
+                case '🐛':
+                    health = Math.round((30 + wave * 5) * settings.enemyHealthMultiplier);
+                    speed = 1 * settings.enemySpeedMultiplier;
+                    reward = 5;
+                    break;
+                case '🐇':
+                    health = Math.round((50 + wave * 8) * settings.enemyHealthMultiplier);
+                    speed = 2 * settings.enemySpeedMultiplier;
+                    reward = 10;
+                    break;
+                case '🐀':
+                    health = Math.round((80 + wave * 12) * settings.enemyHealthMultiplier);
+                    speed = 0.8 * settings.enemySpeedMultiplier;
+                    reward = 15;
+                    break;
+                case '🐦':
+                    health = Math.round((60 + wave * 10) * settings.enemyHealthMultiplier);
+                    speed = 1.5 * settings.enemySpeedMultiplier;
+                    reward = 12;
+                    break;
+                case '🐌':
+                    health = Math.round((120 + wave * 15) * settings.enemyHealthMultiplier);
+                    speed = 0.5 * settings.enemySpeedMultiplier;
+                    reward = 20;
+                    break;
+                case '🦗':
+                    health = Math.round((40 + wave * 6) * settings.enemyHealthMultiplier);
+                    speed = 2.5 * settings.enemySpeedMultiplier;
+                    reward = 8;
+                    break;
+                case '🦎':
+                    health = Math.round((70 + wave * 10) * settings.enemyHealthMultiplier);
+                    speed = 1.2 * settings.enemySpeedMultiplier;
+                    reward = 14;
+                    break;
+                case '🐝':
+                    health = Math.round((45 + wave * 7) * settings.enemyHealthMultiplier);
+                    speed = 1.8 * settings.enemySpeedMultiplier;
+                    reward = 10;
+                    break;
+                case '🐜':
+                    health = Math.round((25 + wave * 4) * settings.enemyHealthMultiplier);
+                    speed = 1.3 * settings.enemySpeedMultiplier;
+                    reward = 5;
+                    break;
+                case '🦂':
+                    health = Math.round((90 + wave * 13) * settings.enemyHealthMultiplier);
+                    speed = 0.7 * settings.enemySpeedMultiplier;
+                    reward = 18;
+                    break;
+                case '🐺': // 特殊敌人 - 狼
+                    health = Math.round((150 + wave * 20) * settings.enemyHealthMultiplier);
+                    speed = 1.5 * settings.enemySpeedMultiplier;
+                    reward = 25;
+                    bossDamageMultiplier = 2.5; // BOSS对胡萝卜造成2.5倍伤害
+                    break;
+                case '🦅': // 特殊敌人 - 老鹰
+                    health = Math.round((100 + wave * 15) * settings.enemyHealthMultiplier);
+                    speed = 2 * settings.enemySpeedMultiplier;
+                    reward = 30;
+                    bossDamageMultiplier = 2.5; // BOSS对胡萝卜造成2.5倍伤害
+                    break;
+                // 新敌人
+                case '🐲': // 巨龙
+                    health = Math.round((200 + wave * 25) * settings.enemyHealthMultiplier);
+                    speed = 1.2 * settings.enemySpeedMultiplier;
+                    reward = 50;
+                    break;
+                case '🧙': // 魔法兔
+                    health = Math.round((100 + wave * 15) * settings.enemyHealthMultiplier);
+                    speed = 0.8 * settings.enemySpeedMultiplier;
+                    reward = 25;
+                    break;
+                case '🐞': // 装甲虫
+                    health = Math.round((150 + wave * 20) * settings.enemyHealthMultiplier);
+                    speed = 0.6 * settings.enemySpeedMultiplier;
+                    reward = 30;
+                    break;
+                case '🐌🧪': // 毒液蜗牛
+                    health = Math.round((90 + wave * 12) * settings.enemyHealthMultiplier);
+                    speed = 0.4 * settings.enemySpeedMultiplier;
+                    reward = 20;
+                    break;
+            }
+            
+            const enemy = {
+                type: enemyType,
+                x: path[0].x,
+                y: path[0].y,
+                health: health,
+                maxHealth: health,
+                speed: speed,
+                reward: reward,
+                pathIndex: 0,
+                element: null,
+                isFlying: enemyType === '🐦' || enemyType === '🐝' || enemyType === '🦅' || enemyType === '🐲',
+                stunTimer: 0,
+                dodgeChance: enemyType === '🦎' ? 0.2 : 0,
+                canDisableTowers: enemyType === '🦂' || enemyType === '🐲',
+                disableTimer: 0,
+                isBoss: enemyType === '🐺' || enemyType === '🦅' || enemyType === '🐲',
+                bossDamageMultiplier: bossDamageMultiplier, // BOSS伤害倍数
+                // 新敌人特有属性
+                isArmored: enemyType === '🐞',
+                armor: enemyType === '🐞' ? 0.3 : 0, // 减少30%伤害
+                isToxic: enemyType === '🐌🧪',
+                summonMinions: enemyType === '🧙',
+                minionCooldown: 0
+            };
+            
+            enemies.push(enemy);
+            
+            // 在页面上显示敌人
+            const enemyElement = document.createElement('div');
+            enemyElement.className = `enemy ${enemyType}`;
+            enemyElement.textContent = enemyType;
+            
+            // 如果是BOSS敌人，放大显示
+            if (enemy.isBoss) {
+                enemyElement.style.fontSize = '40px';
+                enemyElement.style.zIndex = '4';
+            }
+            
+            enemyElement.style.left = `${enemy.x-15}px`;
+            enemyElement.style.top = `${enemy.y-15}px`;
+            
+            // 添加血条
+            const healthBar = document.createElement('div');
+            healthBar.className = 'health-bar';
+            const healthFill = document.createElement('div');
+            healthFill.className = 'health-fill';
+            healthBar.appendChild(healthFill);
+            enemyElement.appendChild(healthBar);
+            
+            document.getElementById('game-board').appendChild(enemyElement);
+            enemy.element = enemyElement;
+            enemy.healthFill = healthFill;
+            enemyElements.push(enemyElement);
+        }
+        
+        // 更新游戏状态
+        function updateGame() {
+            if (gamePaused) return;
+            
+            gameStats.gameTime += 16;
+            
+            // 更新敌人位置
+            enemies.forEach(enemy => {
+                // 如果敌人被眩晕，跳过移动
+                if (enemy.stunTimer > 0) {
+                    enemy.stunTimer -= 16;
+                    return;
+                }
+                
+                const target = path[enemy.pathIndex];
+                const dx = target.x - enemy.x;
+                const dy = target.y - enemy.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < enemy.speed) {
+                    enemy.x = target.x;
+                    enemy.y = target.y;
+                    enemy.pathIndex++;
+                    
+                    if (enemy.pathIndex >= path.length) {
+                        // 敌人到达终点，根据敌人类型计算伤害
+                        const damage = enemy.isBoss ? 2 * enemy.bossDamageMultiplier : 1;
+                        lives -= damage;
+                        updateGameInfo();
+                        removeEnemy(enemy);
+                        
+                        if (lives <= 0) {
+                            gameOver();
+                        }
+                        return;
+                    }
+                } else {
+                    enemy.x += (dx / distance) * enemy.speed;
+                    enemy.y += (dy / distance) * enemy.speed;
+                }
+                
+                enemy.element.style.left = `${enemy.x-15}px`;
+                enemy.element.style.top = `${enemy.y-15}px`;
+                
+                // 魔法兔召唤小兔
+                if (enemy.summonMinions && enemy.minionCooldown <= 0) {
+                    if (Math.random() < 0.01) {
+                        createSingleEnemy('🐇');
+                        enemy.minionCooldown = 5000;
+                        
+                        // 显示召唤效果
+                        const summonEffect = document.createElement('div');
+                        summonEffect.textContent = '✨';
+                        summonEffect.style.position = 'absolute';
+                        summonEffect.style.left = `${enemy.x-15}px`;
+                        summonEffect.style.top = `${enemy.y-30}px`;
+                        document.getElementById('game-board').appendChild(summonEffect);
+                        
+                        setTimeout(() => {
+                            summonEffect.remove();
+                        }, 1000);
+                    }
+                } else {
+                    enemy.minionCooldown -= 16;
+                }
+                
+                // 毒液蜗牛留下毒液
+                if (enemy.isToxic && Math.random() < 0.02) {
+                    // 创建毒液效果
+                    const toxicEffect = document.createElement('div');
+                    toxicEffect.textContent = '💧';
+                    toxicEffect.style.position = 'absolute';
+                    toxicEffect.style.left = `${enemy.x-10}px`;
+                    toxicEffect.style.top = `${enemy.y-10}px`;
+                    toxicEffect.style.fontSize = '20px';
+                    toxicEffect.style.color = '#7cb342';
+                    toxicEffect.style.zIndex = '2';
+                    toxicEffect.style.opacity = '0.7';
+                    document.getElementById('game-board').appendChild(toxicEffect);
+                    
+                    setTimeout(() => {
+                        toxicEffect.remove();
+                    }, 5000);
+                }
+            });
+            
+            // 更新防御塔攻击
+            towers.forEach(tower => {
+                // 如果塔被禁用，跳过攻击
+                if (tower.disableTimer > 0) {
+                    tower.disableTimer -= 16;
+                    return;
+                }
+                
+                if (tower.isMine) {
+                    // 处理地雷
+                    if (tower.mineActive) {
+                        enemies.forEach(enemy => {
+                            const dx = enemy.x - tower.x;
+                            const dy = enemy.y - tower.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < 60) {
+                                // 地雷爆炸
+                                enemy.health -= tower.damage;
+                                enemy.healthFill.style.width = `${(enemy.health / enemy.maxHealth) * 100}%`;
+                                if (enemy.health <= 0) {
+                                    money += Math.round(enemy.reward * difficultySettings[difficulty].rewardMultiplier);
+                                    gameStats.enemiesDefeated++;
+                                    gameStats.totalMoneyEarned += Math.round(enemy.reward * difficultySettings[difficulty].rewardMultiplier);
+                                    updateGameInfo();
+                                    removeEnemy(enemy);
+                                    checkAchievements();
+                                }
+                                
+                                // 移除地雷
+                                tower.element.remove();
+                                const index = towers.indexOf(tower);
+                                if (index !== -1) {
+                                    towers.splice(index, 1);
+                                }
+                                
+                                // 创建爆炸效果
+                                const explosion = document.createElement('div');
+                                explosion.className = 'projectile';
+                                explosion.textContent = '💥';
+                                explosion.style.left = `${tower.x-20}px`;
+                                explosion.style.top = `${tower.y-20}px`;
+                                explosion.style.fontSize = '40px';
+                                document.getElementById('game-board').appendChild(explosion);
+                                projectileElements.push(explosion);
+                                
+                                setTimeout(() => {
+                                    explosion.remove();
+                                    const index = projectileElements.indexOf(explosion);
+                                    if (index !== -1) {
+                                        projectileElements.splice(index, 1);
+                                    }
+                                }, 500);
+                                
+                                playSound('enemyDefeated');
+                            }
+                        });
+                    }
+                    return;
+                }
+                
+                if (tower.cooldown > 0) {
+                    tower.cooldown -= 16;
+                    return;
+                }
+                
+                // 寻找最近的敌人
+                let closestEnemy = null;
+                let minDistance = Infinity;
+                
+                enemies.forEach(enemy => {
+                    // 飞行敌人只能被特定塔攻击
+                    if (enemy.isFlying && tower.type !== 'corn-cannon' && tower.type !== 'melon-pult' && 
+                        tower.type !== 'cactus' && tower.type !== 'mushroom') return;
+                    
+                    const dx = enemy.x - tower.x;
+                    const dy = enemy.y - tower.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < tower.range && distance < minDistance) {
+                        closestEnemy = enemy;
+                        minDistance = distance;
+                    }
+                });
+                
+                if (closestEnemy) {
+                    // 攻击敌人
+                    tower.cooldown = towerData[tower.type].cooldown;
+                    createProjectile(tower, closestEnemy);
+                    playSound('towerAttack');
+                }
+            });
+            
+            // 更新投射物
+            projectiles.forEach((proj, index) => {
+                const dx = proj.target.x - proj.x;
+                const dy = proj.target.y - proj.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 10) {
+                    // 检查敌人是否闪避
+                    if (proj.target.dodgeChance > 0 && Math.random() < proj.target.dodgeChance) {
+                        // 显示闪避效果
+                        const dodgeText = document.createElement('div');
+                        dodgeText.textContent = '闪避!';
+                        dodgeText.style.position = 'absolute';
+                        dodgeText.style.left = `${proj.target.x-15}px`;
+                        dodgeText.style.top = `${proj.target.y-30}px`;
+                        dodgeText.style.color = '#2196F3';
+                        dodgeText.style.fontWeight = 'bold';
+                        document.getElementById('game-board').appendChild(dodgeText);
+                        
+                        setTimeout(() => {
+                            dodgeText.remove();
+                        }, 500);
+                    } else {
+                        // 计算伤害
+                        let damage = proj.damage;
+                        
+                        // 装甲敌人减少伤害
+                        if (proj.target.isArmored) {
+                            damage = Math.round(damage * (1 - proj.target.armor));
+                        }
+                        
+                        // 检查暴击
+                        if (proj.critChance && Math.random() < proj.critChance) {
+                            damage *= 2;
+                            
+                            // 显示暴击效果
+                            const critText = document.createElement('div');
+                            critText.textContent = '暴击!';
+                            critText.style.position = 'absolute';
+                            critText.style.left = `${proj.target.x-15}px`;
+                            critText.style.top = `${proj.target.y-30}px`;
+                            critText.style.color = '#FF5722';
+                            critText.style.fontWeight = 'bold';
+                            document.getElementById('game-board').appendChild(critText);
+                            
+                            setTimeout(() => {
+                                critText.remove();
+                            }, 500);
+                        }
+                        
+                        // 造成伤害
+                        proj.target.health -= damage;
+                        proj.target.healthFill.style.width = `${(proj.target.health / proj.target.maxHealth) * 100}%`;
+                        
+                        // 如果是大蒜塔，眩晕敌人
+                        if (proj.stunDuration > 0) {
+                            proj.target.stunTimer = proj.stunDuration;
+                            
+                            // 显示眩晕效果
+                            const stunEffect = document.createElement('div');
+                            stunEffect.textContent = '💫';
+                            stunEffect.style.position = 'absolute';
+                            stunEffect.style.left = `${proj.target.x-15}px`;
+                            stunEffect.style.top = `${proj.target.y-30}px`;
+                            document.getElementById('game-board').appendChild(stunEffect);
+                            
+                            setTimeout(() => {
+                                stunEffect.remove();
+                            }, proj.stunDuration);
+                        }
+                        
+                        // 如果是草莓射手，使敌人中毒
+                        if (proj.poisonChance && Math.random() < proj.poisonChance) {
+                            proj.target.poisoned = {
+                                damage: proj.poisonDamage,
+                                duration: proj.poisonDuration,
+                                timer: proj.poisonDuration
+                            };
+                            
+                            // 显示中毒效果
+                            const poisonEffect = document.createElement('div');
+                            poisonEffect.textContent = '☠️';
+                            poisonEffect.style.position = 'absolute';
+                            poisonEffect.style.left = `${proj.target.x-15}px`;
+                            poisonEffect.style.top = `${proj.target.y-30}px`;
+                            document.getElementById('game-board').appendChild(poisonEffect);
+                            
+                            setTimeout(() => {
+                                poisonEffect.remove();
+                            }, proj.poisonDuration);
+                        }
+                        
+                        // 如果是蝎子或巨龙，禁用防御塔
+                        if (proj.target.canDisableTowers) {
+                            // 找到最近的防御塔
+                            let closestTower = null;
+                            let minDistance = Infinity;
+                            
+                            towers.forEach(tower => {
+                                if (!tower.isMine) {
+                                    const dx = tower.x - proj.target.x;
+                                    const dy = tower.y - proj.target.y;
+                                    const distance = Math.sqrt(dx * dx + dy * dy);
+                                    
+                                    if (distance < 100 && distance < minDistance) {
+                                        closestTower = tower;
+                                        minDistance = distance;
+                                    }
+                                }
+                            });
+                            
+                            if (closestTower) {
+                                closestTower.disableTimer = 3000; // 禁用3秒
+                                
+                                // 显示禁用效果
+                                const disableEffect = document.createElement('div');
+                                disableEffect.textContent = '❌';
+                                disableEffect.style.position = 'absolute';
+                                disableEffect.style.left = `${closestTower.x-15}px`;
+                                disableEffect.style.top = `${closestTower.y-30}px`;
+                                disableEffect.style.fontSize = '20px';
+                                document.getElementById('game-board').appendChild(disableEffect);
+                                
+                                setTimeout(() => {
+                                    disableEffect.remove();
+                                }, 3000);
+                            }
+                        }
+                        
+                        // 如果是西瓜投手或菠萝炸弹，造成溅射伤害
+                        if (proj.splashRadius > 0) {
+                            enemies.forEach(enemy => {
+                                if (enemy !== proj.target) {
+                                    const dx = enemy.x - proj.target.x;
+                                    const dy = enemy.y - proj.target.y;
+                                    const distance = Math.sqrt(dx * dx + dy * dy);
+                                    
+                                    if (distance < proj.splashRadius) {
+                                        let splashDamage = damage * 0.5; // 溅射伤害为50%
+                                        
+                                        // 装甲敌人减少伤害
+                                        if (enemy.isArmored) {
+                                            splashDamage = Math.round(splashDamage * (1 - enemy.armor));
+                                        }
+                                        
+                                        enemy.health -= splashDamage;
+                                        enemy.healthFill.style.width = `${(enemy.health / enemy.maxHealth) * 100}%`;
+                                        
+                                        if (enemy.health <= 0) {
+                                            money += Math.round(enemy.reward * difficultySettings[difficulty].rewardMultiplier);
+                                            gameStats.enemiesDefeated++;
+                                            gameStats.totalMoneyEarned += Math.round(enemy.reward * difficultySettings[difficulty].rewardMultiplier);
+                                            updateGameInfo();
+                                            removeEnemy(enemy);
+                                            checkAchievements();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // 如果是仙人掌射手，有几率穿透敌人
+                        if (proj.pierceChance && Math.random() < proj.pierceChance) {
+                            // 寻找穿透路径上的其他敌人
+                            enemies.forEach(enemy => {
+                                if (enemy !== proj.target) {
+                                    const dx = enemy.x - proj.target.x;
+                                    const dy = enemy.y - proj.target.y;
+                                    const distance = Math.sqrt(dx * dx + dy * dy);
+                                    
+                                    // 检查是否在穿透路径上
+                                    if (distance < 100 && Math.abs(Math.atan2(dy, dx) - Math.atan2(proj.dy, proj.dx)) < 0.2) {
+                                        let pierceDamage = damage * 0.7; // 穿透伤害为70%
+                                        
+                                        // 装甲敌人减少伤害
+                                        if (enemy.isArmored) {
+                                            pierceDamage = Math.round(pierceDamage * (1 - enemy.armor));
+                                        }
+                                        
+                                        enemy.health -= pierceDamage;
+                                        enemy.healthFill.style.width = `${(enemy.health / enemy.maxHealth) * 100}%`;
+                                        
+                                        if (enemy.health <= 0) {
+                                            money += Math.round(enemy.reward * difficultySettings[difficulty].rewardMultiplier);
+                                            gameStats.enemiesDefeated++;
+                                            gameStats.totalMoneyEarned += Math.round(enemy.reward * difficultySettings[difficulty].rewardMultiplier);
+                                            updateGameInfo();
+                                            removeEnemy(enemy);
+                                            checkAchievements();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // 如果是蘑菇云，减速敌人
+                        if (proj.slowEffect > 0) {
+                            proj.target.slowed = {
+                                effect: proj.slowEffect,
+                                duration: proj.slowDuration,
+                                timer: proj.slowDuration
+                            };
+                            
+                            // 显示减速效果
+                            const slowEffect = document.createElement('div');
+                            slowEffect.textContent = '🐌';
+                            slowEffect.style.position = 'absolute';
+                            slowEffect.style.left = `${proj.target.x-15}px`;
+                            slowEffect.style.top = `${proj.target.y-30}px`;
+                            document.getElementById('game-board').appendChild(slowEffect);
+                            
+                            setTimeout(() => {
+                                slowEffect.remove();
+                            }, proj.slowDuration);
+                        }
+                        
+                        if (proj.target.health <= 0) {
+                            money += Math.round(proj.target.reward * difficultySettings[difficulty].rewardMultiplier);
+                            gameStats.enemiesDefeated++;
+                            gameStats.totalMoneyEarned += Math.round(proj.target.reward * difficultySettings[difficulty].rewardMultiplier);
+                            updateGameInfo();
+                            removeEnemy(proj.target);
+                            checkAchievements();
+                            playSound('enemyDefeated');
+                        }
+                    }
+                    
+                    // 移除投射物
+                    proj.element.remove();
+                    const projIndex = projectileElements.indexOf(proj.element);
+                    if (projIndex !== -1) {
+                        projectileElements.splice(projIndex, 1);
+                    }
+                    projectiles.splice(index, 1);
+                } else {
+                    // 移动投射物
+                    proj.x += (dx / distance) * 8;
+                    proj.y += (dy / distance) * 8;
+                    proj.element.style.left = `${proj.x-10}px`;
+                    proj.element.style.top = `${proj.y-10}px`;
+                }
+            });
+            
+            // 处理中毒效果
+            enemies.forEach(enemy => {
+                if (enemy.poisoned && enemy.poisoned.timer > 0) {
+                    enemy.poisoned.timer -= 16;
+                    if (enemy.poisoned.timer % 1000 < 16) {
+                        // 每秒造成中毒伤害
+                        enemy.health -= enemy.poisoned.damage;
+                        enemy.healthFill.style.width = `${(enemy.health / enemy.maxHealth) * 100}%`;
+                        
+                        // 显示中毒伤害
+                        const poisonDamage = document.createElement('div');
+                        poisonDamage.textContent = `-${enemy.poisoned.damage}`;
+                        poisonDamage.style.position = 'absolute';
+                        poisonDamage.style.left = `${enemy.x-15}px`;
+                        poisonDamage.style.top = `${enemy.y-30}px`;
+                        poisonDamage.style.color = '#7cb342';
+                        poisonDamage.style.fontWeight = 'bold';
+                        document.getElementById('game-board').appendChild(poisonDamage);
+                        
+                        setTimeout(() => {
+                            poisonDamage.style.top = `${enemy.y-50}px`;
+                            poisonDamage.style.opacity = '0';
+                            setTimeout(() => {
+                                poisonDamage.remove();
+                            }, 500);
+                        }, 100);
+                        
+                        if (enemy.health <= 0) {
+                            money += Math.round(enemy.reward * difficultySettings[difficulty].rewardMultiplier);
+                            gameStats.enemiesDefeated++;
+                            gameStats.totalMoneyEarned += Math.round(enemy.reward * difficultySettings[difficulty].rewardMultiplier);
+                            updateGameInfo();
+                            removeEnemy(enemy);
+                            checkAchievements();
+                        }
+                    }
+                    
+                    if (enemy.poisoned.timer <= 0) {
+                        delete enemy.poisoned;
+                    }
+                }
+                
+                // 处理减速效果
+                if (enemy.slowed && enemy.slowed.timer > 0) {
+                    enemy.slowed.timer -= 16;
+                    enemy.speed = enemy.originalSpeed * (1 - enemy.slowed.effect);
+                    
+                    if (enemy.slowed.timer <= 0) {
+                        enemy.speed = enemy.originalSpeed;
+                        delete enemy.slowed;
+                    }
+                }
+            });
+        }
+        
+        // 创建投射物
+        function createProjectile(tower, enemy) {
+            const projectile = {
+                type: tower.type,
+                x: tower.x,
+                y: tower.y,
+                target: enemy,
+                damage: tower.damage,
+                element: null,
+                critChance: tower.critChance,
+                stunDuration: tower.stunDuration,
+                splashRadius: tower.splashRadius,
+                // 新炮台特有属性
+                poisonChance: tower.poisonChance,
+                poisonDuration: tower.poisonDuration,
+                poisonDamage: tower.poisonDamage,
+                pierceChance: tower.pierceChance,
+                slowEffect: tower.slowEffect,
+                slowDuration: tower.slowDuration,
+                // 记录方向用于穿透计算
+                dx: enemy.x - tower.x,
+                dy: enemy.y - tower.y
+            };
+            
+            projectiles.push(projectile);
+            
+            // 在页面上显示投射物
+            const projElement = document.createElement('div');
+            projElement.className = 'projectile';
+            
+            // 不同塔有不同的投射物外观
+            switch(tower.type) {
+                case 'pea-shooter':
+                    projElement.textContent = '•';
+                    projElement.style.color = '#2e7d32';
+                    break;
+                case 'pepper-thrower':
+                    projElement.textContent = '🔥';
+                    break;
+                case 'onion-guard':
+                    projElement.textContent = '💧';
+                    projElement.style.color = '#ffeb3b';
+                    break;
+                case 'corn-cannon':
+                    projElement.textContent = '🌽';
+                    break;
+                case 'garlic-tower':
+                    projElement.textContent = '🧄';
+                    projElement.style.color = '#f8bbd0';
+                    break;
+                case 'cabbage-pult':
+                    projElement.textContent = '🥬';
+                    projElement.style.color = '#dce775';
+                    break;
+                case 'melon-pult':
+                    projElement.textContent = '🍉';
+                    break;
+                case 'strawberry':
+                    projElement.textContent = '🍓';
+                    projElement.style.color = '#f44336';
+                    break;
+                case 'pineapple':
+                    projElement.textContent = '🍍';
+                    projElement.style.color = '#ffeb3b';
+                    break;
+                case 'cactus':
+                    projElement.textContent = '🌵';
+                    projElement.style.color = '#4caf50';
+                    break;
+                case 'mushroom':
+                    projElement.textContent = '☁️';
+                    projElement.style.color = '#7b1fa2';
+                    break;
+            }
+            
+            projElement.style.left = `${tower.x-10}px`;
+            projElement.style.top = `${tower.y-10}px`;
+            document.getElementById('game-board').appendChild(projElement);
+            projectile.element = projElement;
+            projectileElements.push(projElement);
+        }
+        
+        // 移除敌人
+        function removeEnemy(enemy) {
+            enemy.element.remove();
+            const index = enemies.indexOf(enemy);
+            if (index !== -1) {
+                enemies.splice(index, 1);
+            }
+            const elementIndex = enemyElements.indexOf(enemy.element);
+            if (elementIndex !== -1) {
+                enemyElements.splice(elementIndex, 1);
+            }
+        }
+        
+        // 游戏结束
+        function gameOver() {
+            clearInterval(window.gameLoop);
+            window.gameLoop = null;
+            if (sunflowerInterval) {
+                clearInterval(sunflowerInterval);
+                sunflowerInterval = null;
+            }
+            showMessage(`游戏结束! 你坚持了 ${wave} 波`);
+            document.getElementById('start-button').disabled = true;
+            playSound('gameOver');
+        }
+        
+        // 更新游戏信息
+        function updateGameInfo() {
+            document.getElementById('money').textContent = money;
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('wave').textContent = wave;
+            document.getElementById('max-wave').textContent = maxWave;
+            document.getElementById('achievement-count').textContent = gameStats.achievementsUnlocked;
+            
+            // 更新防御塔选项的可购买状态
+            document.querySelectorAll('.tower-option').forEach(opt => {
+                const type = opt.className.split(' ')[1];
+                if (money < getTowerCost(type)) {
+                    opt.style.opacity = '0.5';
+                } else {
+                    opt.style.opacity = '1';
+                }
+            });
+        }
+        
+        // 显示消息
+        function showMessage(msg) {
+            document.getElementById('message').textContent = msg;
+        }
+        
+        // 播放音效
+        function playSound(type) {
+            if (!soundEnabled) return;
+            const sound = sounds[type];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log('无法播放音效:', e));
+            }
+        }
+        
+        // 检查成就
+        function checkAchievements() {
+            let newAchievements = false;
+            let unlockedNewTower = false;
+            
+            achievementData.forEach(ach => {
+                if (!achievements.includes(ach.id) && ach.condition(gameStats)) {
+                    achievements.push(ach.id);
+                    gameStats.achievementsUnlocked++;
+                    showMessage(`成就解锁: ${ach.name}!`);
+                    newAchievements = true;
+                    
+                    // 解锁新炮台
+                    if (ach.unlockTower && !unlockedTowers[ach.unlockTower]) {
+                        unlockedTowers[ach.unlockTower] = true;
+                        unlockedNewTower = true;
+                        
+                        // 显示解锁通知
+                        const unlockNotification = document.createElement('div');
+                        unlockNotification.className = 'unlock-notification';
+                        unlockNotification.textContent = `解锁新炮台: ${towerData[ach.unlockTower].name} ${towerData[ach.unlockTower].emoji}`;
+                        document.body.appendChild(unlockNotification);
+                        
+                        setTimeout(() => {
+                            unlockNotification.remove();
+                        }, 3000);
+                        
+                        playSound('unlock');
+                    }
+                    
+                    // 显示成就解锁效果
+                    const achievementUnlocked = document.createElement('div');
+                    achievementUnlocked.className = 'special-wave';
+                    achievementUnlocked.textContent = `成就解锁: ${ach.name}!`;
+                    achievementUnlocked.style.backgroundColor = 'rgba(255, 215, 0, 0.8)';
+                    document.getElementById('game-board').appendChild(achievementUnlocked);
+                    
+                    setTimeout(() => {
+                        achievementUnlocked.remove();
+                    }, 3000);
+                }
+            });
+            
+            if (newAchievements) {
+                updateGameInfo();
+                if (!unlockedNewTower) {
+                    playSound('upgrade');
+                }
+            }
+            
+            if (unlockedNewTower) {
+                updateTowerSelector();
+            }
+        }
+        
+        // 初始化游戏
+        initGame();
+    </script>
+</body>
+</html>
